@@ -4,21 +4,27 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const worldSize = 2000;
-const pixelSize = 4;
+const worldSize = 3000;   // büyük dünya
+const pixelSize = 3;      // küçük pixel
 
 let offsetX = worldSize / 2 - canvas.width / 2;
 let offsetY = worldSize / 2 - canvas.height / 2;
 
 let selectedColor = "red";
 
+let userId = "kullanıcı" + Math.floor(Math.random() * 1000);
+console.log("User:", userId);
+
 const pixels = {};
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Beyaz dünya
   ctx.fillStyle = "white";
   ctx.fillRect(-offsetX, -offsetY, worldSize, worldSize);
 
+  // Pixel çiz
   for (let key in pixels) {
     const [x, y] = key.split("_").map(Number);
     ctx.fillStyle = pixels[key];
@@ -33,6 +39,7 @@ canvas.addEventListener("click", (e) => {
   draw();
 });
 
+// Sürükleyerek gezme
 let dragging = false;
 let startX, startY;
 
@@ -48,6 +55,7 @@ canvas.addEventListener("mousemove", (e) => {
   offsetX -= e.clientX - startX;
   offsetY -= e.clientY - startY;
 
+  // sınır kontrolü
   offsetX = Math.max(0, Math.min(worldSize - canvas.width, offsetX));
   offsetY = Math.max(0, Math.min(worldSize - canvas.height, offsetY));
 
@@ -58,8 +66,9 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mouseup", () => dragging = false);
+canvas.addEventListener("mouseleave", () => dragging = false);
 
-draw();
+// Renk Paleti
 const palette = document.getElementById("palette");
 
 for (let i = 0; i < 360; i += 10) {
@@ -72,4 +81,6 @@ for (let i = 0; i < 360; i += 10) {
   };
 
   palette.appendChild(div);
-                       }
+}
+
+draw();
