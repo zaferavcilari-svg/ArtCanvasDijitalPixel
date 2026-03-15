@@ -1,22 +1,16 @@
 import { pixelData } from './pixelData.js';
 
 export function initPalette() {
-    const palettePanel = document.getElementById('palette-panel');
-    
+    const panel = document.getElementById('palette-panel');
     pixelData.colors.forEach((color, index) => {
         const div = document.createElement('div');
-        div.className = 'color-box';
+        div.className = 'color-box' + (index === 0 ? ' selected' : '');
         div.style.backgroundColor = color;
-        div.style.width = '55px'; // 5 kat büyük
-        div.style.height = '55px';
-        
-        if(index === 0) div.classList.add('selected');
-
         div.onclick = () => {
             document.querySelectorAll('.color-box').forEach(el => el.classList.remove('selected'));
             div.classList.add('selected');
             pixelData.selectedColor = color;
         };
-        palettePanel.appendChild(div);
+        panel.appendChild(div);
     });
 }
