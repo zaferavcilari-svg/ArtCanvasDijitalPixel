@@ -6,11 +6,10 @@ export const pixelData = {
         '#FFA500', '#FFDBAC', '#FFFF00', '#006400', '#008000', 
         '#0000FF', '#00008B', '#800080', '#FFC0CB', '#4B0082', '#00FFFF'
     ],
-    sync: function(canvasElement) {
+    sync: function(canvas) {
         setInterval(() => {
-            const data = canvasElement.toDataURL();
-            localStorage.setItem('artCanvas_save', data);
-            console.log("Senkronize edildi...");
+            localStorage.setItem('artCanvas_backup', canvas.toDataURL());
+            console.log("Senkronizasyon: Kayıt yapıldı.");
         }, 1000);
     }
 };
