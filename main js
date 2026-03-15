@@ -1,12 +1,7 @@
-import { initCanvas } from './canvas.js';
+import { initCanvas, canvas } from './canvas.js';
 import { initPalette } from './palette.js';
+import { pixelData } from './pixelData.js';
 
-// Oyunu başlat
 initCanvas();
 initPalette();
-
-// 1 Saniyede bir senkronizasyon simülasyonu
-setInterval(() => {
-    // Burada pixelData üzerinden sunucudaki yeni pikseller kontrol edilecek
-    console.log("Art Canvas Senkronize Ediliyor...");
-}, 1000);
+pixelData.sync(canvas); // Senkronizasyonu başlat
