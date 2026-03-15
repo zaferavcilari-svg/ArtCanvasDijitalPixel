@@ -1,0 +1,46 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Chrome zoom engelleme için */
+    background-color: #0000FF; /* Kanvas dışı mavi */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#game-container {
+    width: 100vw;
+    height: 80vh;
+    cursor: crosshair;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    background-color: white;
+    image-rendering: pixelated; /* Pixellerin net görünmesi için */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#palette-panel {
+    position: fixed;
+    bottom: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.color-box {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/* Seçili renk halkası */
+.color-box.selected {
+    border: 3px solid #00BFFF; /* Açık mavi halka */
+}
