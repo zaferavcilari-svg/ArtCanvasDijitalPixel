@@ -1,9 +1,9 @@
 import { initCanvas, canvas } from './canvas.js';
-import { initPalette } from './palette.js';
+import { initPalette } from './pallete.js'; 
 import { initControls } from './controls.js';
 import { pixelData } from './pixelData.js';
 
 initCanvas();
 initPalette();
-initControls(); // Butonları ekle
+initControls();
 pixelData.sync(canvas);
