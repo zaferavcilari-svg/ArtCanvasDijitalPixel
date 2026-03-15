@@ -2,148 +2,15 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Art Canvas - Yıldırım</title>
-    <style>
-        body {
-            margin: 0; padding: 0; overflow: hidden;
-            background-color: #0000FF; /* Dış alan mavi */
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-        }
-
-        #game-container {
-            width: 100vw; height: 100vh;
-            position: relative; overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        /* Kanvasın Kare Kalması ve Boyutu */
-        canvas {
-            background-color: white;
-            image-rendering: pixelated;
-            width: 300px; height: 300px; /* Görsel boyut kare */
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            touch-action: none; /* Mobilde çakışmayı önler */
-        }
-
-        /* YATAY SABİT PALET */
-        #palette-panel {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px 0; display: flex; justify-content: center;
-            gap: 10px; border-top: 3px solid #00BFFF;
-            z-index: 1000; overflow-x: auto;
-        }
-
-        .color-box {
-            width: 35px; height: 35px; border-radius: 50%;
-            cursor: pointer; border: 3px solid transparent; flex-shrink: 0;
-        }
-
-        .color-box.selected {
-            border-color: #00BFFF; /* Açık mavi halka */
-            transform: scale(1.1);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div id="game-container">
         <canvas id="artCanvas"></canvas>
     </div>
-
     <div id="palette-panel"></div>
-
-    <script>
-        const canvas = document.getElementById('artCanvas');
-        const ctx = canvas.getContext('2d');
-        const palette = document.getElementById('palette-panel');
-
-        // 1. KANVAS AYARLARI (128x128)
-        const size = 128;
-        canvas.width = size;
-        canvas.height = size;
-
-        const colors = [
-            '#000000', '#808080', '#FFFFFF', '#FF0000', '#800000', 
-            '#FFA500', '#FFDBAC', '#FFFF00', '#006400', '#008000', 
-            '#0000FF', '#00008B', '#800080', '#FFC0CB', '#4B0082', '#00FFFF'
-        ];
-
-        let selectedColor = colors[0];
-
-        // 2. PALETİ OLUŞTURMA (Yatay)
-        colors.forEach((color, index) => {
-            const div = document.createElement('div');
-            div.className = 'color-box' + (index === 0 ? ' selected' : '');
-            div.style.backgroundColor = color;
-            div.onclick = () => {
-                document.querySelectorAll('.color-box').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedColor = color;
-            };
-            palette.appendChild(div);
-        });
-
-        // 3. ZOOM VE HAREKET SİSTEMİ
-        let scale = 1;
-        let posX = 0;
-        let posY = 0;
-        let isDragging = false;
-        let startX, startY;
-
-        function updateTransform() {
-            canvas.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
-        }
-
-        // Mouse/Dokunmatik Hareket
-        window.onmousedown = (e) => {
-            if (e.target.id === 'artCanvas' || e.target.id === 'game-container') {
-                isDragging = true;
-                startX = e.clientX - posX;
-                startY = e.clientY - posY;
-            }
-        };
-
-        window.onmousemove = (e) => {
-            if (!isDragging) return;
-            posX = e.clientX - startX;
-            posY = e.clientY - startY;
-            
-            // Mavi alandan çok uzaklaşma sınırı
-            posX = Math.max(-500, Math.min(500, posX));
-            posY = Math.max(-500, Math.min(500, posY));
-            updateTransform();
-        };
-
-        window.onmouseup = () => isDragging = false;
-
-        // Kendi Zoom Sistemimiz (Tekerlek)
-        window.onwheel = (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) scale += 0.2;
-            else scale = Math.max(0.5, scale - 0.2);
-            updateTransform();
-        };
-
-        // 4. PİKSEL KOYMA
-        canvas.onclick = (e) => {
-            if (isDragging && (Math.abs(e.clientX - startX - posX) > 5)) return; // Sürüklerken çizme
-
-            const rect = canvas.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / (rect.width / size));
-            const y = Math.floor((e.clientY - rect.top) / (rect.height / size));
-
-            if (x >= 0 && x < size && y >= 0 && y < size) {
-                ctx.fillStyle = selectedColor;
-                ctx.fillRect(x, y, 1, 1);
-            }
-        };
-
-        // 5. SENKRONİZASYON (1 Saniye)
-        setInterval(() => {
-            console.log("Art Canvas Senkronize Ediliyor...");
-        }, 1000);
-    </script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
