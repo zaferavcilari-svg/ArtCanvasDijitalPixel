@@ -1,46 +1,60 @@
 body {
     margin: 0;
-    overflow: hidden; /* Chrome zoom engelleme için */
+    padding: 0;
+    overflow: hidden; /* Sayfanın kaymasını engeller */
     background-color: #0000FF; /* Kanvas dışı mavi */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#game-container {
-    width: 100vw;
-    height: 80vh;
-    cursor: crosshair;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-canvas {
-    background-color: white;
-    image-rendering: pixelated; /* Pixellerin net görünmesi için */
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: none; /* Mobilde kaydırmayı engeller */
 }
 
+/* Kanvasın ekranda büyük görünmesini sağlayan kısım */
+canvas {
+    background-color: white;
+    image-rendering: pixelated; /* Pixellerin netleşmesini sağlar */
+    width: 80vw; /* Ekran genişliğinin %80'i kadar görünür */
+    max-width: 500px; /* Çok fazla devasa olmasın diye sınır */
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    transition: transform 0.1s ease-out; /* Yakınlaştırma yumuşatması */
+}
+
+/* YATAY PALET - Alt kısma yapışık */
 #palette-panel {
     position: fixed;
-    bottom: 20px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 15px;
+    padding: 15px 0;
     display: flex;
+    justify-content: center;
     gap: 10px;
+    border-top: 2px solid #ccc;
+    z-index: 100;
+    overflow-x: auto; /* Renkler sığmazsa kaydırılabilir */
 }
 
 .color-box {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid transparent;
+    flex-shrink: 0; /* Renklerin ezilmesini engeller */
+    border: 3px solid transparent;
 }
 
-/* Seçili renk halkası */
 .color-box.selected {
-    border: 3px solid #00BFFF; /* Açık mavi halka */
+    border: 3px solid #00BFFF; /* Seçili renk halkası */
+    transform: scale(1.1);
 }
