@@ -7,8 +7,9 @@ export function initPalette() {
         const div = document.createElement('div');
         div.className = 'color-box';
         div.style.backgroundColor = color;
+        div.style.width = '55px'; // 5 kat büyük
+        div.style.height = '55px';
         
-        // İlk renk (Siyah) seçili başlasın
         if(index === 0) div.classList.add('selected');
 
         div.onclick = () => {
