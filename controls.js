@@ -1,45 +1,24 @@
 import { canvas } from './canvas.js';
 
-export function initControls() {
-    const controlPanel = document.createElement('div');
-    controlPanel.id = 'control-panel';
-    
-    // Buton Ayarları (Yukarı, Aşağı, Sol, Sağ, +, -)
-    const buttons = [
-        { text: '⬆️', action: () => move(0, -2) },
-        { text: '⬇️', action: () => move(0, 2) },
-        { text: '⬅️', action: () => move(-2, 0) },
-        { text: '➡️', action: () => move(2, 0) },
-        { text: '🔍+', action: () => zoom(0.2) },
-        { text: '🔍-', action: () => zoom(-0.2) }
-    ];
-
-    buttons.forEach(btn => {
-        const b = document.createElement('button');
-        b.innerText = btn.text;
-        b.onclick = btn.action;
-        b.className = 'control-btn';
-        controlPanel.appendChild(b);
-    });
-
-    document.body.appendChild(controlPanel);
-}
-
 let scale = 1.5;
 let posX = 0, posY = 0;
 
-function move(x, y) {
-    posX += x;
-    posY += y;
-    update();
+export function initControls() {
+    const panel = document.createElement('div');
+    panel.id = 'control-panel';
+    const btns = [
+        { t: '⬆️', a: () => move(0, -20) }, { t: '⬇️', a: () => move(0, 20) },
+        { t: '⬅️', a: () => move(-20, 0) }, { t: '➡️', a: () => move(20, 0) },
+        { t: '➕', a: () => zoom(0.3) }, { t: '➖', a: () => zoom(-0.3) }
+    ];
+    btns.forEach(b => {
+        const btn = document.createElement('button');
+        btn.innerText = b.t; btn.onclick = b.a; btn.className = 'control-btn';
+        panel.appendChild(btn);
+    });
+    document.body.appendChild(panel);
 }
 
-function zoom(amount) {
-    scale = Math.max(0.5, scale + amount);
-    update();
-}
-
-function update() {
-    canvas.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
-}
-
+function move(x, y) { posX += x; posY += y; update(); }
+function zoom(s) { scale = Math.max(0.5, scale + s); update(); }
+function update() { canvas.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`; }
