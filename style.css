@@ -1,40 +1,14 @@
-body {
-    margin: 0; padding: 0; overflow: hidden;
-    background-color: #0000FF; height: 100vh;
-    display: flex; justify-content: center; align-items: center;
-}
-
-canvas {
-    background-color: white;
-    image-rendering: pixelated;
-    width: 300px; height: 300px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-/* KONTROLLER: SAĞ ALT KÖŞE */
-#control-panel {
-    position: fixed; bottom: 90px; right: 15px; 
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; z-index: 1001;
-}
-
-.control-btn {
-    padding: 10px; font-size: 18px; background: white;
-    border: 2px solid #00BFFF; border-radius: 8px; cursor: pointer;
-}
-
-/* PALET: TÜM RENKLERİ SIĞDIRAN DÜZEN */
 #palette-panel {
     position: fixed; bottom: 0; width: 100%; height: 80px;
     background: white; display: flex; justify-content: center;
     align-items: center; gap: 6px; border-top: 4px solid #00BFFF;
     z-index: 1000; padding: 0 10px;
 }
-
 .color-box {
-    width: 35px; height: 35px; border-radius: 6px;
-    cursor: pointer; border: 2px solid transparent; flex-shrink: 1;
+    width: 30px; height: 30px; border-radius: 4px; /* Kutular küçüldü */
+    cursor: pointer; border: 1px solid #ddd; flex-shrink: 0;
 }
-
-.color-box.selected {
-    border-color: #00BFFF; transform: scale(1.1);
+#control-panel {
+    position: fixed; bottom: 90px; right: 15px; 
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; z-index: 1001;
 }
