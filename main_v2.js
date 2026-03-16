@@ -4,7 +4,6 @@ const config = {
     scale: 1.5,
     posX: 0,
     posY: 0,
-    // Tüm renkleri buraya ekliyoruz:
     colors: [
         '#000000', '#808080', '#FFFFFF', '#FF0000', '#800000', 
         '#FFA500', '#FFDBAC', '#FFFF00', '#006400', '#008000', 
@@ -17,7 +16,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = config.canvasSize;
 canvas.height = config.canvasSize;
 
-// 1. Renk Kutucuklarını Palete Ekle
+// Palet Kutucuklarını Ekle
 const palette = document.getElementById('palette-panel');
 config.colors.forEach((color, index) => {
     const div = document.createElement('div');
@@ -31,7 +30,7 @@ config.colors.forEach((color, index) => {
     palette.appendChild(div);
 });
 
-// 2. Butonları Ekle (Sağ Tarafta Duracaklar)
+// Kontrol Butonları (Sağ Alt Köşe)
 function initControls() {
     const panel = document.createElement('div');
     panel.id = 'control-panel';
@@ -54,7 +53,6 @@ function update() {
     canvas.style.transform = `translate(${config.posX}px, ${config.posY}px) scale(${config.scale})`; 
 }
 
-// 3. Piksel Çizme
 canvas.onclick = (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / (rect.width / config.canvasSize));
@@ -62,11 +60,6 @@ canvas.onclick = (e) => {
     ctx.fillStyle = config.selectedColor;
     ctx.fillRect(x, y, 1, 1);
 };
-
-// 4. Senkronizasyon (1 saniyede bir kaydeder)
-setInterval(() => {
-    localStorage.setItem('artCanvas_last', canvas.toDataURL());
-}, 1000);
 
 initControls();
 update();
