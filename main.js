@@ -1,4 +1,4 @@
-// 1. AYARLAR VE RENKLER (Siyah, Gri, Beyaz eklendi)
+// Renk ve Konfigürasyon Ayarları
 const config = {
     selectedColor: '#000000',
     canvasSize: 128,
@@ -17,7 +17,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = config.canvasSize;
 canvas.height = config.canvasSize;
 
-// 2. PALETİ OLUŞTUR
+// 1. Dev Paleti Oluştur
 const palette = document.getElementById('palette-panel');
 config.colors.forEach((color, index) => {
     const div = document.createElement('div');
@@ -31,30 +31,34 @@ config.colors.forEach((color, index) => {
     palette.appendChild(div);
 });
 
-// 3. KONTROL BUTONLARINI OLUŞTUR (4 Yön + 2 Zoom)
-const controlPanel = document.createElement('div');
-controlPanel.id = 'control-panel';
-const buttons = [
-    { t: '⬆️', a: () => move(0, -30) }, { t: '⬇️', a: () => move(0, 30) },
-    { t: '⬅️', a: () => move(-30, 0) }, { t: '➡️', a: () => move(30, 0) },
-    { t: '➕', a: () => zoom(0.4) }, { t: '➖', a: () => zoom(-0.4) }
-];
+// 2. Kontrol Butonlarını Ekle (4 Yön + 2 Zoom)
+function initUI() {
+    const controlPanel = document.createElement('div');
+    controlPanel.id = 'control-panel';
+    const buttons = [
+        { t: '⬆️', a: () => move(0, -30) }, { t: '⬇️', a: () => move(0, 30) },
+        { t: '⬅️', a: () => move(-30, 0) }, { t: '➡️', a: () => move(30, 0) },
+        { t: '➕', a: () => zoom(0.4) }, { t: '➖', a: () => zoom(-0.4) }
+    ];
 
-buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.innerText = b.t; btn.onclick = b.a; btn.className = 'control-btn';
-    controlPanel.appendChild(btn);
-});
-document.body.appendChild(controlPanel);
+    buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.innerText = b.t;
+        btn.onclick = b.a;
+        btn.className = 'control-btn';
+        controlPanel.appendChild(btn);
+    });
+    document.body.appendChild(controlPanel);
+}
 
-// 4. HAREKET VE ZOOM FONKSİYONLARI
+// 3. Fonksiyonlar
 function move(x, y) { config.posX += x; config.posY += y; update(); }
 function zoom(s) { config.scale = Math.max(0.2, config.scale + s); update(); }
 function update() { 
     canvas.style.transform = `translate(${config.posX}px, ${config.posY}px) scale(${config.scale})`; 
 }
 
-// 5. PİKSEL KOYMA
+// 4. Çizim Yapma
 canvas.onclick = (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / (rect.width / config.canvasSize));
@@ -63,19 +67,11 @@ canvas.onclick = (e) => {
     ctx.fillRect(x, y, 1, 1);
 };
 
-// 6. SENKRONİZASYON (1 Saniyede Bir Kaydet)
-setInterval(() => {
-    localStorage.setItem('artCanvas_save', canvas.toDataURL());
-    console.log("Art Canvas: Kayıt Yapıldı (1s)");
-}, 1000);
+// Başlat
+initUI();
+update();
 
-// Eski kaydı yükle
-window.onload = () => {
-    const saved = localStorage.getItem('artCanvas_save');
-    if(saved) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0);
-        img.src = saved;
-    }
-    update(); // Başlangıç konumunu ayarla
-};
+// Her 1 saniyede bir senkronizasyon (Local)
+setInterval(() => {
+    localStorage.setItem('artCanvas_backup', canvas.toDataURL());
+}, 1000);
