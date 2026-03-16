@@ -9,11 +9,12 @@ canvas {
     image-rendering: pixelated;
     width: 300px; height: 300px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    position: absolute;
 }
 
-/* Kontrol Butonları (Paletin Üstünde) */
+/* KONTROL BUTONLARI (Paletin Üstünde) */
 #control-panel {
-    position: fixed; bottom: 100px; left: 50%;
+    position: fixed; bottom: 125px; left: 50%;
     transform: translateX(-50%); display: grid;
     grid-template-columns: repeat(3, 1fr); gap: 10px; z-index: 1001;
 }
@@ -23,16 +24,17 @@ canvas {
     border: 3px solid #00BFFF; border-radius: 12px; cursor: pointer;
 }
 
-/* DEV YATAY PALET */
+/* DEV PALET */
 #palette-panel {
-    position: fixed; bottom: 0; width: 100%; height: 90px;
-    background: rgba(255, 255, 255, 0.95); display: flex;
+    position: fixed; bottom: 0; width: 100%; height: 110px;
+    background: white; display: flex;
     justify-content: center; align-items: center; gap: 12px;
-    border-top: 4px solid #00BFFF; overflow-x: auto; padding: 0 10px;
+    border-top: 5px solid #00BFFF; overflow-x: auto; padding: 0 15px;
+    z-index: 1000;
 }
 
 .color-box {
-    width: 60px; height: 60px; border-radius: 50%;
+    width: 65px; height: 65px; border-radius: 50%;
     cursor: pointer; border: 4px solid transparent; flex-shrink: 0;
 }
 
