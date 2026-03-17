@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Art Canvas Alpha ac1</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>ArtCanvas - Dijital</title>
     <style>
-        /* SENİN ESKİ STİLLERİN */
         body { margin: 0; background: #0000FF; overflow: hidden; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #canvas-wrap { position: relative; width: 320px; height: 320px; background: white; border: 4px solid #00BFFF; overflow: hidden; }
         canvas { width: 100%; height: 100%; image-rendering: pixelated; transform-origin: center; }
@@ -17,19 +14,21 @@
         .color { width: 32px; height: 32px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
         .color.active { border: 3px solid #00BFFF; transform: scale(1.1); }
 
-        /* YENİ EKLEMLER: CHAT VE PROFİL */
+        /* Üst Bilgi Çubuğu */
+        #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; }
+        
+        /* Chat Balonu (Sol Alt) */
         #chat-icon { position: fixed; bottom: 100px; left: 15px; width: 55px; height: 55px; background: #00BFFF; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2000; border: 3px solid white; }
-        #notif-dot { position: absolute; top: 0; right: 0; width: 15px; height: 15px; background: red; border-radius: 50%; display: none; border: 2px solid white; }
-        #chat-window { position: fixed; bottom: 165px; left: 15px; width: 280px; height: 350px; background: white; border-radius: 15px; display: none; flex-direction: column; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 2000; border: 3px solid #00BFFF; }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 14px; }
-        #chat-input-area { display: flex; padding: 8px; border-top: 1px solid #ddd; }
-        #chat-input { flex: 1; border: 1px solid #ccc; border-radius: 5px; padding: 5px; }
+        #chat-window { position: fixed; bottom: 165px; left: 15px; width: 280px; height: 300px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 2000; border: 3px solid #00BFFF; }
 
+        /* Profil Girişi */
         #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; display: flex; align-items: center; justify-content: center; }
         .profile-card { background: white; padding: 30px; border-radius: 20px; text-align: center; border: 5px solid #00BFFF; width: 80%; max-width: 300px; }
     </style>
 </head>
 <body>
+
+    <div id="header-bar">Dijital - ArtCanvas (Alpha)</div>
 
     <div id="canvas-wrap">
         <canvas id="artCanvas"></canvas>
@@ -46,31 +45,25 @@
 
     <div id="ui-palette"></div>
 
-    <div id="chat-icon" onclick="toggleChat()">
-        <span style="font-size: 25px;">💬</span>
-        <div id="notif-dot"></div>
-    </div>
+    <div id="chat-icon" onclick="toggleChat()">💬</div>
     <div id="chat-window">
-        <div style="background:#00BFFF; color:white; padding:8px; text-align:center; font-weight:bold;">Hydra Chat</div>
-        <div id="chat-messages"></div>
-        <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Yaz..." onkeypress="if(event.key==='Enter') sendMsg()">
-            <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; margin-left:5px; border-radius:5px;">Gönder</button>
-        </div>
+        <div style="background:#00BFFF; color:white; padding:5px; text-align:center; font-size:12px;">UKZCM Hydra Chat Merkezi</div>
+        <div id="chat-messages" style="flex:1; overflow-y:auto; padding:10px;"></div>
     </div>
 
     <div id="profile-overlay">
         <div class="profile-card">
-            <h2 style="color:#00BFFF; margin-top:0;">Yıldırımlar123</h2>
-            <p>İsmini Belirle:</p>
-            <input type="text" id="username-input" style="padding:10px; width:90%; border:2px solid #ddd; border-radius:5px;">
+            <h2 style="color:#00BFFF;">Dijital ArtCanvas</h2>
+            <p>UKZCM Hydra projesine hoş geldin. İsmini belirle:</p>
+            <input type="text" id="username-input" style="padding:10px; width:90%; border-radius:5px; border:2px solid #ddd;">
             <br><br>
             <button onclick="saveProfile()" style="padding:12px 25px; background:#00BFFF; color:white; border:none; border-radius:10px; font-weight:bold; width:100%;">Kaydol ve Başla</button>
+            <p style="font-size:10px; color:#666; margin-top:15px;">© Dijital - Yıldırımlar123</p>
         </div>
     </div>
 
     <script>
-        /* SENİN ESKİ ÇİZİM KODLARIN (DOKUNULMADI) */
+        // Çizim Sistemi
         const cvs = document.getElementById('artCanvas');
         const ctx = cvs.getContext('2d');
         let clr = '#000000', sc = 1, px = 0, py = 0, sz = 128;
@@ -103,70 +96,38 @@
             ctx.fillRect(x, y, 1, 1);
         });
 
-        /* CHAT VE PROFİL SİSTEMİ (ÇEREZ VE FIREBASE) */
-        const firebaseConfig = {
-            apiKey: "API_ANAHTARIN",
-            databaseURL: "DB_URL_ADRESIN",
-            projectId: "PROJE_IDN"
-            // Diğer Firebase bilgilerini buraya ekle
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let currentUser = "";
-        function setCookie(n, v) {
-            let d = new Date(); d.setTime(d.getTime()+(30*24*60*60*1000));
-            document.cookie = n+"="+v+";expires="+d.toUTCString()+";path=/";
+        // Termux Veri Senkronizasyonu (Kodla Konuşma)
+        function updateData() {
+            fetch('database.json?t=' + Date.now())
+            .then(res => res.json())
+            .then(data => {
+                const box = document.getElementById('chat-messages');
+                box.innerHTML = "";
+                data.messages.forEach(m => {
+                    box.innerHTML += `<div style="margin-bottom:5px;"><b>${m.user}:</b> ${m.text}</div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            }).catch(e => console.log("Termux bekleniyor..."));
         }
-        function getCookie(n) {
-            let name = n + "=";
-            let ca = document.cookie.split(';');
-            for(let i=0; i<ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
-            }
-            return "";
-        }
-
-        window.onload = () => {
-            let u = getCookie("username");
-            if(u) { currentUser = u; document.getElementById('profile-overlay').style.display = 'none'; }
-            up();
-        };
+        setInterval(updateData, 5000);
 
         function saveProfile() {
-            let val = document.getElementById('username-input').value.trim();
-            if(val.length >= 2) {
-                setCookie("username", val);
-                currentUser = val;
+            let u = document.getElementById('username-input').value.trim();
+            if(u.length >= 2) {
+                document.cookie = "username=" + u + ";max-age=2592000;path=/";
                 document.getElementById('profile-overlay').style.display = 'none';
             }
         }
 
-        let isChatOpen = false;
         function toggleChat() {
-            isChatOpen = !isChatOpen;
-            document.getElementById('chat-window').style.display = isChatOpen ? 'flex' : 'none';
-            if(isChatOpen) document.getElementById('notif-dot').style.display = 'none';
+            let w = document.getElementById('chat-window');
+            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function sendMsg() {
-            let inp = document.getElementById('chat-input');
-            if(!inp.value.trim()) return;
-            db.ref('chat').push({ name: currentUser, msg: inp.value, time: Date.now() });
-            inp.value = "";
-        }
-
-        db.ref('chat').limitToLast(15).on('child_added', (s) => {
-            let d = s.val();
-            let m = document.createElement('div');
-            m.innerHTML = `<b>${d.name}:</b> ${d.msg}`;
-            m.style.marginBottom = "5px";
-            let box = document.getElementById('chat-messages');
-            box.appendChild(m);
-            box.scrollTop = box.scrollHeight;
-            if(!isChatOpen && d.name !== currentUser) document.getElementById('notif-dot').style.display = 'block';
-        });
+        window.onload = () => {
+            if(document.cookie.includes("username")) document.getElementById('profile-overlay').style.display = 'none';
+            up();
+        };
     </script>
 </body>
 </html>
