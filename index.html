@@ -32,7 +32,7 @@
         <source src="rplaceoldmusic.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="header-bar">Dijital - ArtCanvas (AC 0.35)</div>
+    <div id="header-bar">Dijital - ArtCanvas (AC 0.35 Alpha)</div>
     <div id="canvas-wrap"><canvas id="artCanvas"></canvas></div>
 
     <div id="ui-controls">
@@ -132,17 +132,19 @@
 
         function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
 
-        // --- AC 0.35 MÜZİK TETİKLEYİCİ ---
-        function startBGM() {
-            const music = document.getElementById('bgMusic');
-            if (music.paused) {
-                music.play().catch(e => console.log("Etkileşim bekleniyor..."));
-                document.removeEventListener('click', startBGM);
-                document.removeEventListener('touchstart', startBGM);
-            }
+        // --- AC 0.35: GARANTİLİ MÜZİK BAŞLATICI ---
+        const audioSource = document.getElementById('bgMusic');
+        function initMusic() {
+            audioSource.play().then(() => {
+                console.log("Müzik Aktif!");
+                // Bir kez başladıktan sonra dinleyicileri kaldır
+                window.removeEventListener('pointerdown', initMusic);
+                window.removeEventListener('click', initMusic);
+            }).catch(err => console.log("Etkileşim bekleniyor..."));
         }
-        document.addEventListener('click', startBGM);
-        document.addEventListener('touchstart', startBGM);
+        // Ekrandaki her türlü dokunma (A04s için pointerdown en iyisi) müziği tetikler
+        window.addEventListener('pointerdown', initMusic);
+        window.addEventListener('click', initMusic);
 
         window.onload = up;
     </script>
