@@ -56,7 +56,7 @@
     <div id="profile-overlay">
         <div class="profile-card">
             <h2 style="color:#00BFFF; margin-top:0;">Dijital Giriş</h2>
-            <input type="text" id="username-input" placeholder="Metin Giriniz. . ." style="width:90%; padding:12px; border:2px solid #eee; border-radius:8px;">
+            <input type="text" id="username-input" placeholder="İsim Giriniz. . ." style="width:90%; padding:12px; border:2px solid #eee; border-radius:8px;">
             <br><br>
             <button onclick="saveName()" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:10px; font-weight:bold;">KAYDOL</button>
             <button onclick="closeReg()" style="margin-top:15px; background:none; border:none; color:gray; font-size:12px;">Kapat</button>
@@ -64,8 +64,8 @@
     </div>
 
     <script>
-        // --- FIREBASE AYARI ---
-        const firebaseConfig = { databaseURL: "https://PROJE-ADIN-DEFAULT-RTDB.firebaseio.com" }; // BURAYI DEĞİŞTİR
+        // --- SENİN ÖZEL URL'N ---
+        const firebaseConfig = { databaseURL: "https://ukzcm-artcanvas-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -74,7 +74,6 @@
         let clr = '#000000', sc = 1, px = 0, py = 0, sz = 128;
         cvs.width = sz; cvs.height = sz;
 
-        // Renk Paleti
         const colors = ['#000000', '#FFFFFF', '#808080', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#800080', '#FFC0CB', '#FFDBAC', '#00FFFF'];
         const palette = document.getElementById('ui-palette');
         colors.forEach((c, i) => {
@@ -85,12 +84,10 @@
             palette.appendChild(div);
         });
 
-        // Kontroller
         window.m = (dx, dy) => { px += dx; py += dy; up(); };
         window.z = (ds) => { sc = Math.max(0.2, sc + ds); up(); };
         function up() { cvs.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; }
 
-        // Kimlik
         function getCookie(n) { let b = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return b ? b.pop() : ""; }
         let myName = getCookie("user_name") || "Kullanıcı" + Math.floor(Math.random() * 1000);
 
@@ -101,15 +98,15 @@
             if (input.length >= 2) { document.cookie = "user_name=" + input + "; max-age=2592000; path=/"; myName = input; closeReg(); }
         }
 
-        // --- VERİ AKIŞI (FIREBASE) ---
-        // Pixelleri Çek
+        // --- FIREBASE İLE CANLI VERİ ---
+        // Pixelleri Anlık Al
         db.ref('pixels').on('child_added', (snap) => {
             const p = snap.val();
             ctx.fillStyle = p.color;
             ctx.fillRect(p.x, p.y, 1, 1);
         });
 
-        // Mesajları Çek
+        // Mesajları Anlık Al
         db.ref('messages').limitToLast(20).on('child_added', (snap) => {
             const m = snap.val();
             const box = document.getElementById('chat-messages');
@@ -117,15 +114,15 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        // Pixel Koy
+        // Pixel Koyma
         cvs.addEventListener('click', (e) => {
             const r = cvs.getBoundingClientRect();
-            const x = Math.floor((e.clientX - r.left) / (r.width / sz));
-            const y = Math.floor((e.clientY - r.top) / (r.height / sz));
+            const x = Math.floor((e.clientX - r.left) / (r.width / (sz * sc)));
+            const y = Math.floor((e.clientY - r.top) / (r.height / (sz * sc)));
             db.ref('pixels').push({ x, y, color: clr });
         });
 
-        // Mesaj Gönder
+        // Mesaj Gönderme
         function sendMsg() {
             let inp = document.getElementById('chat-input');
             if(!inp.value.trim()) return;
