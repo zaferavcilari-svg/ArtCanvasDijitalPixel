@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArtCanvas - Dijital</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; background: #0000FF; overflow: hidden; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; }
@@ -27,10 +29,7 @@
 <body>
 
     <div id="header-bar">Dijital - ArtCanvas (Alpha)</div>
-
-    <div id="canvas-wrap">
-        <canvas id="artCanvas"></canvas>
-    </div>
+    <div id="canvas-wrap"><canvas id="artCanvas"></canvas></div>
 
     <div id="ui-controls">
         <button class="btn" onclick="m(0,-40)">⬆️</button>
@@ -42,7 +41,6 @@
     </div>
 
     <div id="ui-palette"></div>
-
     <button id="reg-btn" onclick="openReg()">KAYDOL</button>
     <div id="chat-icon" onclick="toggleChat()">💬</div>
     
@@ -58,92 +56,84 @@
     <div id="profile-overlay">
         <div class="profile-card">
             <h2 style="color:#00BFFF; margin-top:0;">Dijital Giriş</h2>
-            <p style="font-size:14px;">Kullanıcı adını belirle:</p>
-            <input type="text" id="username-input" placeholder="Metin Giriniz. . ." style="width:90%; padding:12px; border:2px solid #eee; border-radius:8px; outline:none;">
+            <input type="text" id="username-input" placeholder="Metin Giriniz. . ." style="width:90%; padding:12px; border:2px solid #eee; border-radius:8px;">
             <br><br>
-            <button onclick="saveName()" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">KAYDOL</button>
-            <button onclick="closeReg()" style="margin-top:15px; background:none; border:none; color:gray; font-size:12px; cursor:pointer;">Kapat</button>
+            <button onclick="saveName()" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:10px; font-weight:bold;">KAYDOL</button>
+            <button onclick="closeReg()" style="margin-top:15px; background:none; border:none; color:gray; font-size:12px;">Kapat</button>
         </div>
     </div>
 
     <script>
+        // --- FIREBASE AYARI ---
+        const firebaseConfig = { databaseURL: "https://PROJE-ADIN-DEFAULT-RTDB.firebaseio.com" }; // BURAYI DEĞİŞTİR
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const cvs = document.getElementById('artCanvas');
         const ctx = cvs.getContext('2d');
         let clr = '#000000', sc = 1, px = 0, py = 0, sz = 128;
         cvs.width = sz; cvs.height = sz;
 
+        // Renk Paleti
         const colors = ['#000000', '#FFFFFF', '#808080', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#800080', '#FFC0CB', '#FFDBAC', '#00FFFF'];
         const palette = document.getElementById('ui-palette');
-
         colors.forEach((c, i) => {
             const div = document.createElement('div');
             div.className = 'color' + (i === 0 ? ' active' : '');
             div.style.backgroundColor = c;
-            div.onclick = () => {
-                document.querySelectorAll('.color').forEach(el => el.classList.remove('active'));
-                div.classList.add('active');
-                clr = c;
-            };
+            div.onclick = () => { document.querySelectorAll('.color').forEach(el => el.classList.remove('active')); div.classList.add('active'); clr = c; };
             palette.appendChild(div);
         });
 
+        // Kontroller
         window.m = (dx, dy) => { px += dx; py += dy; up(); };
         window.z = (ds) => { sc = Math.max(0.2, sc + ds); up(); };
         function up() { cvs.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; }
 
-        function getCookie(n) {
-            let b = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
-            return b ? b.pop() : "";
-        }
-
+        // Kimlik
+        function getCookie(n) { let b = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return b ? b.pop() : ""; }
         let myName = getCookie("user_name") || "Kullanıcı" + Math.floor(Math.random() * 1000);
 
         function openReg() { document.getElementById('profile-overlay').style.display = 'flex'; }
         function closeReg() { document.getElementById('profile-overlay').style.display = 'none'; }
         function saveName() {
             let input = document.getElementById('username-input').value.trim();
-            if (input.length >= 2) {
-                document.cookie = "user_name=" + input + "; max-age=2592000; path=/";
-                myName = input;
-                closeReg();
-            }
+            if (input.length >= 2) { document.cookie = "user_name=" + input + "; max-age=2592000; path=/"; myName = input; closeReg(); }
         }
 
-        function toggleChat() {
-            let w = document.getElementById('chat-window');
-            w.style.display = (w.style.display === 'flex') ? 'none' : 'flex';
-        }
+        // --- VERİ AKIŞI (FIREBASE) ---
+        // Pixelleri Çek
+        db.ref('pixels').on('child_added', (snap) => {
+            const p = snap.val();
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 1, 1);
+        });
 
-        function sendMsg() {
-            let inp = document.getElementById('chat-input');
-            if(!inp.value.trim()) return;
-            let msgBox = document.getElementById('chat-messages');
-            msgBox.innerHTML += `<div><b>${myName}:</b> ${inp.value}</div>`;
-            msgBox.scrollTop = msgBox.scrollHeight;
-            inp.value = "";
-        }
+        // Mesajları Çek
+        db.ref('messages').limitToLast(20).on('child_added', (snap) => {
+            const m = snap.val();
+            const box = document.getElementById('chat-messages');
+            box.innerHTML += `<div><b>${m.user}:</b> ${m.text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        });
 
-        function sync() {
-            fetch('database.json?t=' + Date.now())
-            .then(res => res.json())
-            .then(data => {
-                data.pixels.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 1, 1); });
-                const box = document.getElementById('chat-messages');
-                let html = "";
-                data.messages.forEach(m => { html += `<div><b>${m.user}:</b> ${m.text}</div>`; });
-                if(html) box.innerHTML = html;
-            }).catch(e => {});
-        }
-
+        // Pixel Koy
         cvs.addEventListener('click', (e) => {
             const r = cvs.getBoundingClientRect();
             const x = Math.floor((e.clientX - r.left) / (r.width / sz));
             const y = Math.floor((e.clientY - r.top) / (r.height / sz));
-            ctx.fillStyle = clr;
-            ctx.fillRect(x, y, 1, 1);
+            db.ref('pixels').push({ x, y, color: clr });
         });
 
-        setInterval(sync, 4000);
+        // Mesaj Gönder
+        function sendMsg() {
+            let inp = document.getElementById('chat-input');
+            if(!inp.value.trim()) return;
+            db.ref('messages').push({ user: myName, text: inp.value });
+            inp.value = "";
+        }
+
+        function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
         window.onload = up;
     </script>
 </body>
