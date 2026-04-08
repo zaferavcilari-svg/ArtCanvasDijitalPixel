@@ -32,10 +32,8 @@
     </style>
 </head>
 <body>
-
     <div id="px-status">Pixel: <span id="px-count">32</span>/32<br>Yükleme: <span id="px-timer">4</span>s</div>
     <audio id="bgMusic" loop><source src="rplaceoldmusic.mp3" type="audio/mpeg"></audio>
-
     <div id="header-bar">UKZCM Hydra - ArtCanvas (BETA 4.01)</div>
     <div id="canvas-wrap"><canvas id="artCanvas"></canvas></div>
 
@@ -49,42 +47,36 @@
     </div>
 
     <div id="ui-palette"></div>
-    <button id="reg-btn" onclick="openReg()">PROFİL</button>
+    <button id="reg-btn" onclick="openReg()">PROFIL</button>
     <div id="chat-icon" onclick="toggleChat()">💬</div>
-    
     <div id="chat-window">
         <div id="chat-messages"></div>
         <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter')sendMsg()">
+            <input type="text" id="chat-input" placeholder="Mesaj..." onkeypress="if(event.key==='Enter')sendMsg()">
             <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; padding:8px; border-radius:5px; margin-left:5px;">></button>
         </div>
     </div>
 
     <div id="profile-overlay"><div class="profile-card">
-        <h2 id="profile-title" style="color:#00BFFF; margin-top:0;">Beta 4.01</h2>
+        <h2 style="color:#00BFFF; margin-top:0;">Beta 4.01</h2>
         <div style="position:relative; margin-bottom:15px; cursor:pointer;" onclick="openLogoPanel()">
             <img id="profile-pfp" src="guest.jpg" style="width:80px; height:80px; border-radius:50%; border:3px solid #00BFFF; object-fit:cover;">
             <div style="position:absolute; bottom:0; right:30%; background:#00BFFF; color:white; border-radius:50%; width:22px; height:22px; font-size:12px;">📷</div>
         </div>
-        
         <input type="text" id="username-input" placeholder="İsim" class="auth-input">
         <input type="number" id="age-input" placeholder="Yaş" class="auth-input">
         <input type="text" id="country-input" placeholder="Ülke" class="auth-input">
-
         <div id="auth-fields" style="display:none; margin-top:10px; border-top: 1px solid #eee; padding-top: 10px;">
             <input type="email" id="auth-email" placeholder="E-posta" class="auth-input">
             <input type="password" id="auth-pass" placeholder="Şifre" class="auth-input">
         </div>
-
         <div style="margin-top:15px;">
             <button onclick="saveProfileOnly()" id="save-main-btn" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:8px; font-weight:bold; margin-bottom:8px; cursor:pointer;">KAYDET</button>
             <div style="display:flex; justify-content: space-between;">
-                <button onclick="toggleAuthUI('signup')" id="signup-btn-ui" style="background:#333;" class="auth-btn-small">KAYDOL</button>
-                <button onclick="toggleAuthUI('login')" id="login-btn-ui" style="background:#555;" class="auth-btn-small">GİRİŞ YAP</button>
+                <button onclick="toggleAuthUI('signup')" style="background:#333;" class="auth-btn-small">KAYDOL</button>
+                <button onclick="toggleAuthUI('login')" style="background:#555;" class="auth-btn-small">GİRİŞ YAP</button>
             </div>
         </div>
-        
-        <p onclick="requestPassReset()" style="font-size:11px; color:#999; text-decoration:underline; cursor:pointer; margin-top:15px;">Şifremi Unuttum?</p>
         <button onclick="closeReg()" style="background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Kapat</button>
     </div></div>
 
@@ -95,13 +87,10 @@
     </div></div>
 
     <script>
-        // 1. FIREBASE BAĞLANTISI
         const firebaseConfig = { databaseURL: "https://ukzcm-artcanvas-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
+        const db = firebase.database(), auth = firebase.auth();
 
-        // 2. KANVAS MEKANİĞİ
         const cvs = document.getElementById('artCanvas'), ctx = cvs.getContext('2d'), sz = 128;
         let clr = '#000000', sc = 1, px = 0, py = 0; cvs.width = sz; cvs.height = sz;
 
@@ -129,10 +118,7 @@
         });
         db.ref('pixels').on('child_added', (s) => { const p = s.val(); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 1, 1); });
 
-        // 3. PROFİL SİSTEMİ
-        const availLogos = [
-            { url: 'guest.jpg' }, { url: 'yıldırımlogo.jpg' }, { url: 'beratlogo.jpg' }, { url: 'alpaylogo.jpg' }, { url: 'alanlogo.jpg' }, { url: 'antegrialogo.jpg' }
-        ];
+        const availLogos = [{url:'guest.jpg'},{url:'yıldırımlogo.jpg'},{url:'beratlogo.jpg'},{url:'alpaylogo.jpg'},{url:'alanlogo.jpg'},{url:'antegrialogo.jpg'}];
         let selectedLogo = localStorage.getItem('selected_pfp') || 'guest.jpg';
         document.getElementById('profile-pfp').src = selectedLogo;
 
@@ -156,23 +142,17 @@
         }
         function closeLogoPanel() { document.getElementById('logo-panel').style.display = 'none'; }
 
-        // 3 BUTON MEKANİĞİ
         let authMode = '';
         function toggleAuthUI(mode) {
             authMode = mode;
             const fields = document.getElementById('auth-fields');
-            if (fields.style.display === 'none') {
-                fields.style.display = 'block';
-                document.getElementById('save-main-btn').innerText = (mode === 'signup') ? "KAYDOL VE YEDEKLE" : "GİRİŞ YAP VE YÜKLE";
-            } else {
-                saveProfileOnly();
-            }
+            fields.style.display = 'block';
+            document.getElementById('save-main-btn').innerText = (mode === 'signup') ? "KAYDOL VE YEDEKLE" : "GİRİŞ YAP VE YÜKLE";
         }
 
         function saveProfileOnly() {
             const name = document.getElementById('username-input').value, age = document.getElementById('age-input').value, country = document.getElementById('country-input').value;
             const email = document.getElementById('auth-email').value, pass = document.getElementById('auth-pass').value;
-
             if(!name || !age || !country) return alert("Bilgileri doldur!");
             const profile = { name, age, country, pfp: selectedLogo };
             localStorage.setItem('user_profile', JSON.stringify(profile));
@@ -180,10 +160,7 @@
             if (document.getElementById('auth-fields').style.display === 'block') {
                 if(!email || !pass) return alert("E-posta ve şifre gir!");
                 if(authMode === 'signup') {
-                    auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                        db.ref('users/' + u.user.uid).set(profile);
-                        alert("Kaydolundu!"); closeReg();
-                    }).catch(e => alert(e.message));
+                    auth.createUserWithEmailAndPassword(email, pass).then(u => { db.ref('users/' + u.user.uid).set(profile); alert("Kaydolundu!"); closeReg(); }).catch(e => alert(e.message));
                 } else {
                     auth.signInWithEmailAndPassword(email, pass).then(u => {
                         db.ref('users/' + u.user.uid).once('value').then(s => {
@@ -194,13 +171,10 @@
                 }
             } else {
                 if(auth.currentUser) db.ref('users/' + auth.currentUser.uid).update(profile);
-                alert("Profil kaydedildi!"); closeReg();
+                alert("Bilgiler güncellendi!"); closeReg();
             }
         }
 
-        function requestPassReset() { const email = prompt("E-posta:"); if(email) auth.sendPasswordResetEmail(email).then(()=>alert("Mail gönderildi.")); }
-
-        // 4. CHAT SİSTEMİ
         function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
         function sendMsg() {
             let i = document.getElementById('chat-input'), p = JSON.parse(localStorage.getItem('user_profile')) || {name: "Anonim", age: "?", country: "?", pfp: "guest.jpg"};
@@ -212,7 +186,6 @@
             msgBox.scrollTop = msgBox.scrollHeight;
         });
 
-        // 5. BAŞLANGIÇ
         const music = document.getElementById('bgMusic');
         window.addEventListener('pointerdown', () => { music.play().catch(()=>{}); }, {once: true});
         window.onload = () => { up(); updatePixelUI(); };
