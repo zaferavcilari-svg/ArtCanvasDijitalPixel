@@ -3,40 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArtCanvas - AC 0.37 Stabil</title>
+    <title>ArtCanvas - Beta 4.01 Kişisel Güncelleme</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; background: #0000FF; overflow: hidden; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; }
+        body { margin: 0; background: #0000FF; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        /* PİXEL SAYACI KUTUSU */
-        #px-status { position: fixed; top: 50px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px; border-radius: 5px; font-size: 12px; z-index: 4000; border: 1px solid #00BFFF; }
+        #px-status { position: fixed; top: 50px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 8px; border-radius: 8px; font-size: 12px; z-index: 4000; border: 1px solid #00BFFF; }
         
-        #canvas-wrap { position: relative; width: 320px; height: 320px; background: white; border: 4px solid #00BFFF; overflow: hidden; z-index: 5; }
+        #canvas-wrap { position: relative; width: 320px; height: 320px; background: white; border: 4px solid #00BFFF; overflow: hidden; z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         canvas { width: 100%; height: 100%; image-rendering: pixelated; transform-origin: center; }
+        
         #ui-controls { position: fixed; bottom: 110px; right: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; z-index: 2000; }
-        .btn { width: 50px; height: 50px; background: white; border: 3px solid #00BFFF; border-radius: 10px; font-size: 20px; cursor: pointer; }
+        .btn { width: 45px; height: 45px; background: white; border: 2px solid #00BFFF; border-radius: 10px; font-size: 18px; cursor: pointer; }
+        
         #ui-palette { position: fixed; bottom: 0; width: 100%; height: 100px; background: #f0f0f0; border-top: 5px solid #00BFFF; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 5px; box-sizing: border-box; z-index: 1500; }
-        .color { width: 35px; height: 35px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+        .color { width: 30px; height: 30px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
         .color.active { border: 3px solid #00BFFF; transform: scale(1.1); }
-        #chat-icon { position: fixed; bottom: 120px; left: 15px; width: 60px; height: 60px; background: #00BFFF; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2000; border: 3px solid white; font-size: 28px; }
-        #reg-btn { position: fixed; bottom: 190px; left: 15px; width: 65px; height: 35px; background: white; border: 2px solid #00BFFF; border-radius: 8px; cursor: pointer; z-index: 2000; font-size: 11px; font-weight: bold; color: #00BFFF; }
-        #chat-window { position: fixed; bottom: 230px; left: 15px; width: 280px; height: 350px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 2000; border: 3px solid #00BFFF; }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 14px; background: #fafafa; }
-        #chat-input-area { display: flex; padding: 10px; border-top: 1px solid #eee; }
+        
+        #chat-icon { position: fixed; bottom: 120px; left: 15px; width: 55px; height: 55px; background: #00BFFF; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2000; border: 3px solid white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #reg-btn { position: fixed; bottom: 185px; left: 15px; width: 70px; height: 35px; background: white; border: 2px solid #00BFFF; border-radius: 8px; cursor: pointer; z-index: 2000; font-size: 10px; font-weight: bold; color: #00BFFF; }
+        
+        #chat-window { position: fixed; bottom: 230px; left: 15px; width: 280px; height: 350px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 2000; border: 3px solid #00BFFF; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; background: #fafafa; }
+        #chat-input-area { display: flex; padding: 8px; border-top: 1px solid #eee; }
         #chat-input { flex: 1; border: 1px solid #ddd; border-radius: 5px; padding: 8px; outline: none; }
-        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; display: none; align-items: center; justify-content: center; }
-        .profile-card { background: white; padding: 30px; border-radius: 20px; text-align: center; border: 5px solid #00BFFF; width: 260px; }
+        
+        #profile-overlay, #logo-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        .profile-card { background: white; padding: 25px; border-radius: 20px; text-align: center; border: 4px solid #00BFFF; width: 260px; }
+        .logo-item { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; object-fit: cover; }
+        .logo-item:hover { border-color: #00BFFF; }
     </style>
 </head>
 <body>
 
-    <div id="px-status">Pixel: <span id="px-count">150</span>/150<br>Yükleme: <span id="px-timer">60</span>s</div>
-
+    <div id="px-status">Pixel: <span id="px-count">32</span>/32<br>Yükleme: <span id="px-timer">4</span>s</div>
     <audio id="bgMusic" loop><source src="rplaceoldmusic.mp3" type="audio/mpeg"></audio>
 
-    <div id="header-bar">Dijital - ArtCanvas (AC 0.37)</div>
+    <div id="header-bar">UKZCM Hydra - ArtCanvas (BETA 4.01)</div>
     <div id="canvas-wrap"><canvas id="artCanvas"></canvas></div>
 
     <div id="ui-controls">
@@ -49,52 +54,67 @@
     </div>
 
     <div id="ui-palette"></div>
-    <button id="reg-btn" onclick="openReg()">KAYDOL</button>
+    <button id="reg-btn" onclick="openReg()">PROFİL</button>
     <div id="chat-icon" onclick="toggleChat()">💬</div>
     
     <div id="chat-window">
         <div id="chat-messages"></div>
         <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Yaz..." onkeypress="if(event.key==='Enter')sendMsg()">
-            <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; padding:8px;">></button>
+            <input type="text" id="chat-input" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter')sendMsg()">
+            <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; padding:8px; border-radius:5px; margin-left:5px;">></button>
         </div>
     </div>
 
     <div id="profile-overlay"><div class="profile-card">
-        <h2>Kayıt Ol</h2>
-        <input type="text" id="username-input" style="width:80%; padding:10px; margin-bottom:10px;">
-        <button onclick="saveName()" style="width:100%; padding:10px; background:#00BFFF; color:white;">Kaydet</button>
-        <button onclick="closeReg()">Kapat</button>
+        <h2 style="color:#00BFFF; margin-top:0;">Beta 4.01 Kayıt</h2>
+        <div style="position:relative; margin-bottom:15px; cursor:pointer;" onclick="openLogoPanel()">
+            <img id="profile-pfp" src="yıldırımlogo.jpg" style="width:80px; height:80px; border-radius:50%; border:3px solid #00BFFF; object-fit:cover;">
+            <div style="position:absolute; bottom:0; right:30%; background:#00BFFF; color:white; border-radius:50%; width:22px; height:22px; font-size:12px; line-height:22px;">📷</div>
+        </div>
+        <input type="text" id="username-input" placeholder="İsim" style="width:85%; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:5px;">
+        <input type="number" id="age-input" placeholder="Yaş" style="width:85%; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:5px;">
+        <input type="text" id="country-input" placeholder="Ülke" style="width:85%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px;">
+        <button onclick="saveFullProfile()" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:8px; font-weight:bold;">KAYDET VE GİRİŞ YAP</button>
+        <p onclick="requestPassReset()" style="font-size:11px; color:#999; text-decoration:underline; cursor:pointer; margin-top:15px;">Şifremi Unuttum?</p>
+        <button onclick="closeReg()" style="background:none; border:none; color:#666; margin-top:10px;">Kapat</button>
+    </div></div>
+
+    <div id="logo-panel"><div class="profile-card" style="width:280px;">
+        <h3>Logo Seç</h3>
+        <div id="logo-list" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:15px;"></div>
+        <button onclick="closeLogoPanel()" style="width:100%; padding:10px; background:#ccc; border:none; border-radius:5px;">Geri</button>
     </div></div>
 
     <script>
+        // FIREBASE KURULUMU
         const firebaseConfig = { databaseURL: "https://ukzcm-artcanvas-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // KANVAS AYARLARI
         const cvs = document.getElementById('artCanvas');
         const ctx = cvs.getContext('2d');
         let clr = '#000000', sc = 1, px = 0, py = 0, sz = 128;
         cvs.width = sz; cvs.height = sz;
 
-        // PİXEL SINIRI SİSTEMİ
-        let myPixels = parseInt(localStorage.getItem('my_pixels')) || 150;
-        let timeLeft = 60;
+        // PİXEL SAVAŞ MEKANİĞİ (4sn / 6px)
+        let myPixels = parseInt(localStorage.getItem('my_pixels')) || 32;
+        let timeLeft = 4;
         function updatePixelUI() {
             document.getElementById('px-count').innerText = myPixels;
             document.getElementById('px-timer').innerText = timeLeft;
             localStorage.setItem('my_pixels', myPixels);
         }
-
         setInterval(() => {
             timeLeft--;
             if (timeLeft <= 0) {
-                myPixels = Math.min(150, myPixels + 10);
-                timeLeft = 60;
+                myPixels = Math.min(32, myPixels + 6);
+                timeLeft = 4;
             }
             updatePixelUI();
         }, 1000);
 
+        // PALET
         const colors = ['#000000', '#FFFFFF', '#808080', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#800080', '#FFC0CB', '#FFDBAC', '#00FFFF'];
         const palette = document.getElementById('ui-palette');
         colors.forEach((c, i) => {
@@ -105,12 +125,14 @@
             palette.appendChild(div);
         });
 
+        // KONTROLLER
         window.m = (dx, dy) => { px += dx; py += dy; up(); };
         window.z = (ds) => { sc = Math.max(0.2, sc + ds); up(); };
         function up() { cvs.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; }
 
+        // PİXEL KOYMA
         cvs.addEventListener('click', (e) => {
-            if (myPixels <= 0) return alert("Pixel hakkın bitti!");
+            if (myPixels <= 0) return alert("Pixel dolmasını bekle lider!");
             const rect = cvs.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / (rect.width / sz));
             const y = Math.floor((e.clientY - rect.top) / (rect.height / sz));
@@ -127,19 +149,85 @@
             ctx.fillRect(p.x, p.y, 1, 1);
         });
 
-        function getCookie(n) { let b = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return b ? b.pop() : ""; }
-        let myName = getCookie("user_name") || "Kullanıcı" + Math.floor(Math.random()*100);
+        // PROFİL & LOGO SİSTEMİ
+        const availLogos = [
+            { name: 'Yıldırım', url: 'yıldırımlogo.jpg' },
+            { name: 'Berat', url: 'beratlogo.jpg' },
+            { name: 'Alpay', url: 'alpaylogo.jpg' },
+            { name: 'Alan', url: 'alanlogo.jpg' },
+            { name: 'Antegria', url: 'antegrialogo.jpg' }
+        ];
+        let selectedLogo = 'yıldırımlogo.jpg';
+
         function openReg() { document.getElementById('profile-overlay').style.display = 'flex'; }
         function closeReg() { document.getElementById('profile-overlay').style.display = 'none'; }
-        function saveName() { let i = document.getElementById('username-input').value; if(i) { document.cookie = "user_name=" + i + "; max-age=2592000; path=/"; myName = i; closeReg(); }}
-        function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
-        function sendMsg() { let i = document.getElementById('chat-input'); if(i.value) { db.ref('messages').push({ user: myName, text: i.value }); i.value = ""; }}
-        db.ref('messages').limitToLast(15).on('child_added', (s) => { document.getElementById('chat-messages').innerHTML += `<div><b>${s.val().user}:</b> ${s.val().text}</div>`; });
+        function openLogoPanel() {
+            const list = document.getElementById('logo-list');
+            list.innerHTML = '';
+            availLogos.forEach(l => {
+                const img = document.createElement('img');
+                img.src = l.url; img.className = 'logo-item';
+                img.onclick = () => { selectedLogo = l.url; document.getElementById('profile-pfp').src = l.url; closeLogoPanel(); };
+                list.appendChild(img);
+            });
+            const soon = document.createElement('div');
+            soon.innerText = '📷 Soon'; soon.style = 'grid-column:span 3; font-size:10px; color:#aaa; padding:5px;';
+            list.appendChild(soon);
+            document.getElementById('logo-panel').style.display = 'flex';
+        }
+        function closeLogoPanel() { document.getElementById('logo-panel').style.display = 'none'; }
 
+        function saveFullProfile() {
+            const name = document.getElementById('username-input').value;
+            const age = document.getElementById('age-input').value;
+            const country = document.getElementById('country-input').value;
+            if(name && age && country) {
+                const profile = { name, age, country, pfp: selectedLogo };
+                localStorage.setItem('user_profile', JSON.stringify(profile));
+                alert("Profil güncellendi lider!");
+                closeReg();
+            } else { alert("Tüm alanları doldur!"); }
+        }
+
+        // ŞİFREMİ UNUTTUM (GİZLİ VERİ YOLU)
+        function requestPassReset() {
+            const email = prompt("E-posta adresinizi girin:");
+            const extra = prompt("Ek doğrulama bilgileri (Sadece lider okuyabilir):");
+            if(email && extra) {
+                db.ref('sifremi_unuttum').push({ email, extra, time: Date.now() });
+                alert("Talebiniz Yıldırım'a iletildi.");
+            }
+        }
+
+        // CHAT SİSTEMİ
+        function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
+        function sendMsg() {
+            let i = document.getElementById('chat-input');
+            let prof = JSON.parse(localStorage.getItem('user_profile')) || {name: "Anonim", age: "?", country: "?", pfp: "yıldırımlogo.jpg"};
+            if(i.value) {
+                db.ref('messages').push({ user: prof.name, text: i.value, age: prof.age, country: prof.country, pfp: prof.pfp });
+                i.value = "";
+            }
+        }
+
+        db.ref('messages').limitToLast(15).on('child_added', (s) => {
+            const m = s.val();
+            const msgBox = document.getElementById('chat-messages');
+            msgBox.innerHTML += `
+                <div style="display:flex; align-items:center; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    <img src="${m.pfp || 'yıldırımlogo.jpg'}" style="width:30px; height:30px; border-radius:50%; margin-right:8px; border:1px solid #00BFFF;">
+                    <div style="flex:1;">
+                        <b style="color:#00BFFF; font-size:11px;">[${m.country || '?'}/${m.user}/${m.age || '?'}]</b><br>
+                        <span>${m.text}</span>
+                    </div>
+                </div>`;
+            msgBox.scrollTop = msgBox.scrollHeight;
+        });
+
+        // MÜZİK VE BAŞLANGIÇ
         const music = document.getElementById('bgMusic');
         function startAudio() { music.play().catch(() => {}); window.removeEventListener('pointerdown', startAudio); }
         window.addEventListener('pointerdown', startAudio);
-        document.addEventListener('visibilitychange', () => { if (document.hidden) music.pause(); else music.play().catch(() => {}); });
         window.onload = () => { up(); updatePixelUI(); };
     </script>
 </body>
