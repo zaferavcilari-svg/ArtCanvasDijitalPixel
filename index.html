@@ -3,38 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArtCanvas - Beta 4.01 Lider Sürümü</title>
+    <title>ArtCanvas - AC 0.37 Stabil</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <style>
-        body { margin: 0; background: #0000FF; overflow: hidden; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        #px-status { position: fixed; top: 50px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 8px; border-radius: 8px; font-size: 12px; z-index: 4000; border: 1px solid #00BFFF; }
-        #canvas-wrap { position: relative; width: 320px; height: 320px; background: white; border: 4px solid #00BFFF; overflow: hidden; z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        canvas { width: 100%; height: 100%; image-rendering: pixelated; transform-origin: center; cursor: crosshair; }
+        body { margin: 0; background: #0000FF; overflow: hidden; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #header-bar { position: fixed; top: 0; width: 100%; background: #00BFFF; color: white; padding: 10px; text-align: center; font-weight: bold; z-index: 3000; }
+        
+        /* PİXEL SAYACI KUTUSU */
+        #px-status { position: fixed; top: 50px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px; border-radius: 5px; font-size: 12px; z-index: 4000; border: 1px solid #00BFFF; }
+        
+        #canvas-wrap { position: relative; width: 320px; height: 320px; background: white; border: 4px solid #00BFFF; overflow: hidden; z-index: 5; }
+        canvas { width: 100%; height: 100%; image-rendering: pixelated; transform-origin: center; }
         #ui-controls { position: fixed; bottom: 110px; right: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; z-index: 2000; }
-        .btn { width: 45px; height: 45px; background: white; border: 2px solid #00BFFF; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn { width: 50px; height: 50px; background: white; border: 3px solid #00BFFF; border-radius: 10px; font-size: 20px; cursor: pointer; }
         #ui-palette { position: fixed; bottom: 0; width: 100%; height: 100px; background: #f0f0f0; border-top: 5px solid #00BFFF; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 5px; box-sizing: border-box; z-index: 1500; }
-        .color { width: 30px; height: 30px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+        .color { width: 35px; height: 35px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
         .color.active { border: 3px solid #00BFFF; transform: scale(1.1); }
-        #chat-icon { position: fixed; bottom: 120px; left: 15px; width: 55px; height: 55px; background: #00BFFF; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2000; border: 3px solid white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #reg-btn { position: fixed; bottom: 185px; left: 15px; width: 70px; height: 35px; background: white; border: 2px solid #00BFFF; border-radius: 8px; cursor: pointer; z-index: 2000; font-size: 10px; font-weight: bold; color: #00BFFF; }
-        #chat-window { position: fixed; bottom: 230px; left: 15px; width: 280px; height: 350px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 2000; border: 3px solid #00BFFF; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; background: #fafafa; }
-        #chat-input-area { display: flex; padding: 8px; border-top: 1px solid #eee; }
+        #chat-icon { position: fixed; bottom: 120px; left: 15px; width: 60px; height: 60px; background: #00BFFF; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2000; border: 3px solid white; font-size: 28px; }
+        #reg-btn { position: fixed; bottom: 190px; left: 15px; width: 65px; height: 35px; background: white; border: 2px solid #00BFFF; border-radius: 8px; cursor: pointer; z-index: 2000; font-size: 11px; font-weight: bold; color: #00BFFF; }
+        #chat-window { position: fixed; bottom: 230px; left: 15px; width: 280px; height: 350px; background: white; border-radius: 15px; display: none; flex-direction: column; z-index: 2000; border: 3px solid #00BFFF; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 14px; background: #fafafa; }
+        #chat-input-area { display: flex; padding: 10px; border-top: 1px solid #eee; }
         #chat-input { flex: 1; border: 1px solid #ddd; border-radius: 5px; padding: 8px; outline: none; }
-        #profile-overlay, #logo-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; display: none; align-items: center; justify-content: center; }
-        .profile-card { background: white; padding: 25px; border-radius: 20px; text-align: center; border: 4px solid #00BFFF; width: 260px; }
-        .logo-item { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; object-fit: cover; margin: 5px; }
-        .auth-input { width: 90%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        .auth-btn-small { width: 48%; padding: 8px; color: white; border: none; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        #profile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        .profile-card { background: white; padding: 30px; border-radius: 20px; text-align: center; border: 5px solid #00BFFF; width: 260px; }
     </style>
 </head>
 <body>
-    <div id="px-status">Pixel: <span id="px-count">32</span>/32<br>Yükleme: <span id="px-timer">4</span>s</div>
+
+    <div id="px-status">Pixel: <span id="px-count">150</span>/150<br>Yükleme: <span id="px-timer">60</span>s</div>
+
     <audio id="bgMusic" loop><source src="rplaceoldmusic.mp3" type="audio/mpeg"></audio>
-    <div id="header-bar">UKZCM Hydra - ArtCanvas (BETA 4.01)</div>
+
+    <div id="header-bar">Dijital - ArtCanvas (AC 0.37)</div>
     <div id="canvas-wrap"><canvas id="artCanvas"></canvas></div>
 
     <div id="ui-controls">
@@ -47,61 +49,58 @@
     </div>
 
     <div id="ui-palette"></div>
-    <button id="reg-btn" onclick="openReg()">PROFIL</button>
+    <button id="reg-btn" onclick="openReg()">KAYDOL</button>
     <div id="chat-icon" onclick="toggleChat()">💬</div>
+    
     <div id="chat-window">
         <div id="chat-messages"></div>
         <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Mesaj..." onkeypress="if(event.key==='Enter')sendMsg()">
-            <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; padding:8px; border-radius:5px; margin-left:5px;">></button>
+            <input type="text" id="chat-input" placeholder="Yaz..." onkeypress="if(event.key==='Enter')sendMsg()">
+            <button onclick="sendMsg()" style="background:#00BFFF; color:white; border:none; padding:8px;">></button>
         </div>
     </div>
 
     <div id="profile-overlay"><div class="profile-card">
-        <h2 style="color:#00BFFF; margin-top:0;">Beta 4.01</h2>
-        <div style="position:relative; margin-bottom:15px; cursor:pointer;" onclick="openLogoPanel()">
-            <img id="profile-pfp" src="guest.jpg" style="width:80px; height:80px; border-radius:50%; border:3px solid #00BFFF; object-fit:cover;">
-            <div style="position:absolute; bottom:0; right:30%; background:#00BFFF; color:white; border-radius:50%; width:22px; height:22px; font-size:12px;">📷</div>
-        </div>
-        <input type="text" id="username-input" placeholder="İsim" class="auth-input">
-        <input type="number" id="age-input" placeholder="Yaş" class="auth-input">
-        <input type="text" id="country-input" placeholder="Ülke" class="auth-input">
-        <div id="auth-fields" style="display:none; margin-top:10px; border-top: 1px solid #eee; padding-top: 10px;">
-            <input type="email" id="auth-email" placeholder="E-posta" class="auth-input">
-            <input type="password" id="auth-pass" placeholder="Şifre" class="auth-input">
-        </div>
-        <div style="margin-top:15px;">
-            <button onclick="saveProfileOnly()" id="save-main-btn" style="width:100%; padding:12px; background:#00BFFF; color:white; border:none; border-radius:8px; font-weight:bold; margin-bottom:8px; cursor:pointer;">KAYDET</button>
-            <div style="display:flex; justify-content: space-between;">
-                <button onclick="toggleAuthUI('signup')" style="background:#333;" class="auth-btn-small">KAYDOL</button>
-                <button onclick="toggleAuthUI('login')" style="background:#555;" class="auth-btn-small">GİRİŞ YAP</button>
-            </div>
-        </div>
-        <button onclick="closeReg()" style="background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Kapat</button>
-    </div></div>
-
-    <div id="logo-panel"><div class="profile-card" style="width:280px;">
-        <h3>Logo Seç</h3>
-        <div id="logo-list" style="display:flex; flex-wrap:wrap; justify-content:center;"></div>
-        <button onclick="closeLogoPanel()" style="width:100%; padding:10px; background:#ccc; border:none; border-radius:5px; margin-top:10px;">Geri</button>
+        <h2>Kayıt Ol</h2>
+        <input type="text" id="username-input" style="width:80%; padding:10px; margin-bottom:10px;">
+        <button onclick="saveName()" style="width:100%; padding:10px; background:#00BFFF; color:white;">Kaydet</button>
+        <button onclick="closeReg()">Kapat</button>
     </div></div>
 
     <script>
         const firebaseConfig = { databaseURL: "https://ukzcm-artcanvas-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database(), auth = firebase.auth();
+        const db = firebase.database();
 
-        const cvs = document.getElementById('artCanvas'), ctx = cvs.getContext('2d'), sz = 128;
-        let clr = '#000000', sc = 1, px = 0, py = 0; cvs.width = sz; cvs.height = sz;
+        const cvs = document.getElementById('artCanvas');
+        const ctx = cvs.getContext('2d');
+        let clr = '#000000', sc = 1, px = 0, py = 0, sz = 128;
+        cvs.width = sz; cvs.height = sz;
 
-        let myPixels = parseInt(localStorage.getItem('my_pixels')) || 32, timeLeft = 4;
-        function updatePixelUI() { document.getElementById('px-count').innerText = myPixels; document.getElementById('px-timer').innerText = timeLeft; localStorage.setItem('my_pixels', myPixels); }
-        setInterval(() => { timeLeft--; if (timeLeft <= 0) { myPixels = Math.min(32, myPixels + 6); timeLeft = 4; } updatePixelUI(); }, 1000);
+        // PİXEL SINIRI SİSTEMİ
+        let myPixels = parseInt(localStorage.getItem('my_pixels')) || 150;
+        let timeLeft = 60;
+        function updatePixelUI() {
+            document.getElementById('px-count').innerText = myPixels;
+            document.getElementById('px-timer').innerText = timeLeft;
+            localStorage.setItem('my_pixels', myPixels);
+        }
+
+        setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                myPixels = Math.min(150, myPixels + 10);
+                timeLeft = 60;
+            }
+            updatePixelUI();
+        }, 1000);
 
         const colors = ['#000000', '#FFFFFF', '#808080', '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#800080', '#FFC0CB', '#FFDBAC', '#00FFFF'];
         const palette = document.getElementById('ui-palette');
         colors.forEach((c, i) => {
-            const div = document.createElement('div'); div.className = 'color' + (i === 0 ? ' active' : ''); div.style.backgroundColor = c;
+            const div = document.createElement('div');
+            div.className = 'color' + (i === 0 ? ' active' : '');
+            div.style.backgroundColor = c;
             div.onclick = () => { document.querySelectorAll('.color').forEach(el => el.classList.remove('active')); div.classList.add('active'); clr = c; };
             palette.appendChild(div);
         });
@@ -111,84 +110,38 @@
         function up() { cvs.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; }
 
         cvs.addEventListener('click', (e) => {
-            if (myPixels <= 0) return alert("Pixel dolmasını bekle lider!");
+            if (myPixels <= 0) return alert("Pixel hakkın bitti!");
             const rect = cvs.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / (rect.width / sz)), y = Math.floor((e.clientY - rect.top) / (rect.height / sz));
-            if (x >= 0 && x < sz && y >= 0 && y < sz) { db.ref('pixels').push({ x, y, color: clr }); myPixels--; updatePixelUI(); }
-        });
-        db.ref('pixels').on('child_added', (s) => { const p = s.val(); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 1, 1); });
-
-        const availLogos = [{url:'guest.jpg'},{url:'yıldırımlogo.jpg'},{url:'beratlogo.jpg'},{url:'alpaylogo.jpg'},{url:'alanlogo.jpg'},{url:'antegrialogo.jpg'}];
-        let selectedLogo = localStorage.getItem('selected_pfp') || 'guest.jpg';
-        document.getElementById('profile-pfp').src = selectedLogo;
-
-        function openReg() { 
-            const p = JSON.parse(localStorage.getItem('user_profile')) || {name:'', age:'', country:''};
-            document.getElementById('username-input').value = p.name;
-            document.getElementById('age-input').value = p.age;
-            document.getElementById('country-input').value = p.country;
-            document.getElementById('profile-overlay').style.display = 'flex'; 
-        }
-        function closeReg() { document.getElementById('profile-overlay').style.display = 'none'; document.getElementById('auth-fields').style.display = 'none'; }
-        
-        function openLogoPanel() {
-            const list = document.getElementById('logo-list'); list.innerHTML = '';
-            availLogos.forEach(l => {
-                const img = document.createElement('img'); img.src = l.url; img.className = 'logo-item';
-                img.onclick = () => { selectedLogo = l.url; document.getElementById('profile-pfp').src = l.url; localStorage.setItem('selected_pfp', l.url); closeLogoPanel(); };
-                list.appendChild(img);
-            });
-            document.getElementById('logo-panel').style.display = 'flex';
-        }
-        function closeLogoPanel() { document.getElementById('logo-panel').style.display = 'none'; }
-
-        let authMode = '';
-        function toggleAuthUI(mode) {
-            authMode = mode;
-            const fields = document.getElementById('auth-fields');
-            fields.style.display = 'block';
-            document.getElementById('save-main-btn').innerText = (mode === 'signup') ? "KAYDOL VE YEDEKLE" : "GİRİŞ YAP VE YÜKLE";
-        }
-
-        function saveProfileOnly() {
-            const name = document.getElementById('username-input').value, age = document.getElementById('age-input').value, country = document.getElementById('country-input').value;
-            const email = document.getElementById('auth-email').value, pass = document.getElementById('auth-pass').value;
-            if(!name || !age || !country) return alert("Bilgileri doldur!");
-            const profile = { name, age, country, pfp: selectedLogo };
-            localStorage.setItem('user_profile', JSON.stringify(profile));
-
-            if (document.getElementById('auth-fields').style.display === 'block') {
-                if(!email || !pass) return alert("E-posta ve şifre gir!");
-                if(authMode === 'signup') {
-                    auth.createUserWithEmailAndPassword(email, pass).then(u => { db.ref('users/' + u.user.uid).set(profile); alert("Kaydolundu!"); closeReg(); }).catch(e => alert(e.message));
-                } else {
-                    auth.signInWithEmailAndPassword(email, pass).then(u => {
-                        db.ref('users/' + u.user.uid).once('value').then(s => {
-                            if(s.exists()) { localStorage.setItem('user_profile', JSON.stringify(s.val())); selectedLogo = s.val().pfp; document.getElementById('profile-pfp').src = selectedLogo; }
-                            alert("Giriş yapıldı!"); closeReg();
-                        });
-                    }).catch(e => alert(e.message));
-                }
-            } else {
-                if(auth.currentUser) db.ref('users/' + auth.currentUser.uid).update(profile);
-                alert("Bilgiler güncellendi!"); closeReg();
+            const x = Math.floor((e.clientX - rect.left) / (rect.width / sz));
+            const y = Math.floor((e.clientY - rect.top) / (rect.height / sz));
+            if (x >= 0 && x < sz && y >= 0 && y < sz) {
+                db.ref('pixels').push({ x, y, color: clr });
+                myPixels--;
+                updatePixelUI();
             }
-        }
-
-        function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
-        function sendMsg() {
-            let i = document.getElementById('chat-input'), p = JSON.parse(localStorage.getItem('user_profile')) || {name: "Anonim", age: "?", country: "?", pfp: "guest.jpg"};
-            if(i.value) { db.ref('messages').push({ user: p.name, text: i.value, age: p.age, country: p.country, pfp: p.pfp }); i.value = ""; }
-        }
-        db.ref('messages').limitToLast(15).on('child_added', (s) => {
-            const m = s.val(), msgBox = document.getElementById('chat-messages');
-            msgBox.innerHTML += `<div style="display:flex; align-items:center; margin-bottom:8px;"><img src="${m.pfp || 'guest.jpg'}" style="width:30px; height:30px; border-radius:50%; margin-right:8px; border:1px solid #00BFFF;"><div style="flex:1;"><b style="color:#00BFFF; font-size:11px;">[${m.country || '?'}/${m.user}/${m.age || '?'}]</b><br><span>${m.text}</span></div></div>`;
-            msgBox.scrollTop = msgBox.scrollHeight;
         });
+
+        db.ref('pixels').on('child_added', (snap) => {
+            const p = snap.val();
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 1, 1);
+        });
+
+        function getCookie(n) { let b = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return b ? b.pop() : ""; }
+        let myName = getCookie("user_name") || "Kullanıcı" + Math.floor(Math.random()*100);
+        function openReg() { document.getElementById('profile-overlay').style.display = 'flex'; }
+        function closeReg() { document.getElementById('profile-overlay').style.display = 'none'; }
+        function saveName() { let i = document.getElementById('username-input').value; if(i) { document.cookie = "user_name=" + i + "; max-age=2592000; path=/"; myName = i; closeReg(); }}
+        function toggleChat() { let w = document.getElementById('chat-window'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
+        function sendMsg() { let i = document.getElementById('chat-input'); if(i.value) { db.ref('messages').push({ user: myName, text: i.value }); i.value = ""; }}
+        db.ref('messages').limitToLast(15).on('child_added', (s) => { document.getElementById('chat-messages').innerHTML += `<div><b>${s.val().user}:</b> ${s.val().text}</div>`; });
 
         const music = document.getElementById('bgMusic');
-        window.addEventListener('pointerdown', () => { music.play().catch(()=>{}); }, {once: true});
+        function startAudio() { music.play().catch(() => {}); window.removeEventListener('pointerdown', startAudio); }
+        window.addEventListener('pointerdown', startAudio);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) music.pause(); else music.play().catch(() => {}); });
         window.onload = () => { up(); updatePixelUI(); };
     </script>
 </body>
 </html>
+
