@@ -2,36 +2,30 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArtCanvas - Ana Katman</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtCanvas</title>
     <style>
-        * {
+        body, html {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
             background-color: #1a1a1a;
         }
 
-        /* Void_1 katmanı: Ana dizinde olduğu kesinleşti */
         #void-layer {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+            /* Dosyalar aynı dizinde olduğu için sadece isim yeterli */
             background-image: url('void_1.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             z-index: -1;
-            /* Görselin yüklenmesini zorlamak için */
-            display: block; 
         }
     </style>
 </head>
@@ -40,11 +34,11 @@
     <div id="void-layer"></div>
 
     <script>
-        // Hata ayıklama için: Görselin yüklenip yüklenmediğini kontrol et
+        console.log("Dosya kontrolü başlatılıyor...");
         const img = new Image();
         img.src = 'void_1.png';
-        img.onload = () => console.log("Görsel başarıyla yüklendi.");
-        img.onerror = () => console.error("HATA: void_1.png dosyası bulunamadı! Lütfen dosya adını ve konumunu kontrol et.");
+        img.onload = () => console.log("Başarılı: Görsel yüklendi.");
+        img.onerror = () => console.error("HATA: Görsel yüklenemedi! Dosya adında boşluk veya büyük/küçük harf hatası olabilir.");
     </script>
 </body>
 </html>
