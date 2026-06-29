@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArtCanvas - Ana Katman</title>
+    <title>ArtCanvas - Void Katmanı</title>
     <style>
-        /* CSS: Tam ekran ve boş katman ayarları */
         * {
             margin: 0;
             padding: 0;
@@ -15,26 +14,38 @@
         body, html {
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Taşmaları engelle */
-            background-color: #1a1a1a; /* En alt katman rengi */
+            overflow: hidden;
+            background-color: #1a1a1a; 
+        }
+
+        /* Void_1 Görseli - Sabit Arkaplan Katmanı */
+        #void-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('assets/backgrounds/void_1.png');
+            background-size: cover; /* Ekranı tam kaplaması için */
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1; /* Her şeyin arkasında kalması için */
         }
 
         #canvas-container {
             width: 100vw;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
     </style>
 </head>
 <body>
 
+    <div id="void-layer"></div>
+
     <div id="canvas-container"></div>
 
     <script>
-        // JS: Gelecekteki genişleme için hazır başlangıç
-        console.log("ArtCanvas Başlatıldı. Alt katman hazır.");
+        console.log("ArtCanvas Başlatıldı. Void_1 katmanı kalıcı olarak yüklendi.");
     </script>
 </body>
 </html>
