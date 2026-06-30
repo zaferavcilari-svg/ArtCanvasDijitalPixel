@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; image-rendering: pixelated; }
         body { background-color: #121212; overflow: hidden; font-family: sans-serif; height: 100vh; width: 100vw; display: flex; }
 
-        /* KONTROL PANELİ */
+        /* SABİT SOL PANEL */
         #main-side-panel {
             position: fixed; top: 0; left: 0; width: 75px; height: 100vh;
             background-image: url('pannel.png'); background-size: 100% 100%; background-repeat: no-repeat;
@@ -19,32 +19,31 @@
         .hitbox-btn { width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .hitbox-btn img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* LİDERİN MERKEZİ İZLEYİCİ PANELİ */
+        /* KANVAS MONİTÖRÜNÜN SOL ALTINDAKİ KOORDİNAT PANELİ */
         #coords-display {
-            position: fixed; top: 240px; left: 5px; width: 65px; background: rgba(0,0,0,0.85);
-            color: #FFD700; font-weight: bold; font-size: 11px; text-align: center;
-            padding: 4px 2px; border: 2px solid #000; border-radius: 4px; z-index: 2500; pointer-events: none;
+            position: fixed; bottom: 120px; left: 85px; width: 80px; background: rgba(0,0,0,0.85);
+            color: #FFD700; font-weight: bold; font-size: 12px; text-align: center;
+            padding: 6px 4px; border: 2px solid #000; border-radius: 4px; z-index: 2500; pointer-events: none;
         }
 
-        /* ALT PALET */
+        /* SABİT ALT PALET */
         #main-bottom-palette {
             position: fixed; bottom: 0; left: 75px; width: calc(100vw - 75px); height: 110px;
             background-image: url('pallet.png'); background-size: 100% 100%; background-repeat: no-repeat;
             border-top: 4px solid #000000; z-index: 2000; display: flex; flex-direction: column; justify-content: center; padding: 10px; gap: 6px;
         }
         .palette-row { display: flex; gap: 5px; width: 100%; height: 40px; }
-        
-        /* GÖRSEL DESTEKLİ RENK KUTULARI */
         .color-box { flex: 1; height: 100%; border: 3px solid #000000; border-radius: 6px; cursor: pointer; overflow: hidden; }
         .color-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .color-box.active { border-color: #ffffff; transform: scale(1.05); }
         
-        .tool-box { width: 40px; height: 100%; border: 3px solid #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+        .tool-box { width: 40px; height: 100%; border: 3px solid #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: white; }
         .tool-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        #tool-pencil.active { border-color: #FFD700; background-color: rgba(255, 215, 0, 0.3); }
+        #tool-pencil.active { border-color: #FFD700; background-color: rgba(255, 215, 0, 0.4); }
 
-        /* KANVAS VIEWPORT */
-        #viewport { position: absolute; top: 0; left: 75px; width: calc(100vw - 75px); height: calc(100vh - 110px); overflow: hidden; z-index: 1; }
+        /* RAHAT SÜREKLEME VE ZOOM ALANI */
+        #viewport { position: absolute; top: 0; left: 75px; width: calc(100vw - 75px); height: calc(100vh - 110px); overflow: hidden; z-index: 1; cursor: grab; }
+        #viewport:active { cursor: grabbing; }
         #canvas-wrap { position: relative; width: 1028px; height: 1028px; background: #ffffff; transform-origin: center; }
         canvas { width: 100%; height: 100%; }
     </style>
@@ -76,55 +75,121 @@
         const coordsDisplay = document.getElementById('coords-display');
         
         let clr = '#000000', sc = 1, px = 0, py = 0, isDragging = false, pencilMode = false;
+        let startX, startY, isClick = true, initialPinchDist = 0;
+        
         cvs.width = 1028; cvs.height = 1028;
         ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 1028, 1028);
 
-        // 15 Özel Renk Kodun
         const allColors = ['#000000', '#636363', '#AEAEAE', '#FFFFFF', '#FF0010', '#BC4E00', '#FF6A00', '#FFE900', '#3FFF00', '#00A510', '#00FFFF', '#00A1FF', '#0015FF', '#9800FF', '#FF00FA'];
         const rTop = document.getElementById('row-top'), rBot = document.getElementById('row-bottom');
 
-        // Üst ve Alt sıraları asset sırasına göre diziyoruz
         allColors.slice(0, 8).forEach((c, i) => createBox(c, rTop, i));
         allColors.slice(8, 15).forEach((c, i) => createBox(c, rBot, i + 8));
 
         function createBox(c, row, index) {
             const b = document.createElement('div'); b.className = 'color-box'; b.style.backgroundColor = c;
-            
-            // color1.png, color2.png şeklinde senin assetlerini giydirir
             const imgNum = index + 1;
             b.innerHTML = `<img src="color${imgNum}.png">`;
-
+            if(c === clr) b.classList.add('active');
             b.onclick = () => { document.querySelectorAll('.color-box').forEach(x=>x.classList.remove('active')); b.classList.add('active'); clr = c; };
             row.appendChild(b);
         }
 
-        // Kalem Butonu Entegrasyonu (pencil.png)
         const pBtn = document.createElement('div'); pBtn.className = 'tool-box'; pBtn.id = 'tool-pencil'; pBtn.innerHTML = '<img src="pencil.png">';
         pBtn.onclick = () => { pencilMode = !pencilMode; pBtn.classList.toggle('active', pencilMode); };
         rBot.appendChild(pBtn);
 
         function updateTransform() { 
             wrap.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; 
-            let midX = Math.floor((view.clientWidth/2 - px)/sc); let midY = Math.floor((view.clientHeight/2 - py)/sc);
+            let midX = Math.floor((view.clientWidth/2 - px)/sc); 
+            let midY = Math.floor((view.clientHeight/2 - py)/sc);
             coordsDisplay.innerText = `(${midY}_${midX}-)`;
         }
 
         function handleDraw(cx, cy) {
             const rect = cvs.getBoundingClientRect();
-            const x = Math.floor((cx - rect.left) / (rect.width/1028)), y = Math.floor((cy - rect.top) / (rect.height/1028));
-            if (pencilMode && x>=0 && y>=0) db.ref('pixels/'+y+'_'+x).set({color: clr});
+            const x = Math.floor((cx - rect.left) / (rect.width/1028));
+            const y = Math.floor((cy - rect.top) / (rect.height/1028));
+            if (x >= 0 && x < 1028 && y >= 0 && y < 1028) {
+                db.ref('pixels/'+y+'_'+x).set({color: clr});
+            }
         }
 
-        view.addEventListener('mousedown', (e) => { isDragging = true; handleDraw(e.clientX, e.clientY); });
-        window.addEventListener('mousemove', (e) => { if(isDragging && pencilMode) handleDraw(e.clientX, e.clientY); else if(isDragging) { px += e.movementX; py += e.movementY; updateTransform(); } });
-        window.addEventListener('mouseup', () => isDragging = false);
+        // GALERİ RAHATLIĞINDA SÜREKLEME VE ZOOM MEKANİZMASI
+        const startPan = (e) => {
+            if(e.target.closest('#main-side-panel') || e.target.closest('#main-bottom-palette')) return;
+            
+            if (e.touches && e.touches.length === 2) {
+                isDragging = false;
+                initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                return;
+            }
+            
+            isDragging = true;
+            isClick = true;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = cx - px;
+            startY = cy - py;
+        };
 
-        view.addEventListener('touchstart', (e) => { isDragging = true; handleDraw(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
-        window.addEventListener('touchmove', (e) => { if (pencilMode) e.preventDefault(); handleDraw(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
-        window.addEventListener('touchend', () => isDragging = false);
+        const movePan = (e) => {
+            if (e.touches && e.touches.length === 2) {
+                e.preventDefault();
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                let factor = dist / initialPinchDist;
+                sc = factor > 1 ? Math.min(15, sc + 0.1) : Math.max(0.2, sc - 0.1);
+                initialPinchDist = dist;
+                updateTransform();
+                return;
+            }
 
-        db.ref('pixels').on('child_added', (s) => { const [y,x] = s.key.split('_').map(Number); ctx.fillStyle = s.val().color; ctx.fillRect(x, y, 1, 1); });
+            if (!isDragging) return;
+            isClick = false;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            if (pencilMode) {
+                handleDraw(cx, cy);
+            } else {
+                px = cx - startX;
+                py = cy - startY;
+                updateTransform();
+            }
+        };
+
+        const endPan = (e) => {
+            if (isDragging && isClick) {
+                const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+                const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+                handleDraw(cx, cy);
+            }
+            isDragging = false;
+        };
+
+        // Masaüstü tekerlek yakınlaştırması
+        view.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            sc = e.deltaY < 0 ? Math.min(15, sc + 0.15) : Math.max(0.2, sc - 0.15);
+            updateTransform();
+        }, { passive: false });
+
+        view.addEventListener('mousedown', startPan);
+        window.addEventListener('mousemove', movePan);
+        window.addEventListener('mouseup', endPan);
+
+        view.addEventListener('touchstart', startPan, { passive: true });
+        window.addEventListener('touchmove', movePan, { passive: false });
+        window.addEventListener('touchend', endPan);
+
+        db.ref('pixels').on('child_added', (s) => { 
+            const [y,x] = s.key.split('_').map(Number); 
+            ctx.fillStyle = s.val().color; 
+            ctx.fillRect(x, y, 1, 1); 
+        });
+
         window.onload = () => { updateTransform(); };
     </script>
 </body>
 </html>
+
