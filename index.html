@@ -19,7 +19,15 @@
         .hitbox-btn { width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .hitbox-btn img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* MONİTÖRÜN SOL ALTINDAKİ KOORDİNAT PANELİ */
+        /* SAĞ TARAFA EKLENEN YAKINLAŞTIRMA BUTONLARI */
+        #zoom-controls {
+            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 2000;
+        }
+        .zoom-btn { width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .zoom-btn img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* KANVAS MONİTÖRÜNÜN SOL ALTINDAKİ KOORDİNAT PANELİ */
         #coords-display {
             position: fixed; bottom: 120px; left: 85px; width: 80px; background: rgba(0,0,0,0.85);
             color: #FFD700; font-weight: bold; font-size: 12px; text-align: center;
@@ -41,11 +49,10 @@
         .tool-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         #tool-pencil.active { border-color: #FFD700; background-color: rgba(255, 215, 0, 0.4); }
 
-        /* SÜREKLEME VE ORTA NOKTA ODAKLI ZOOM ALANI */
+        /* SÜREKLEME ALANI */
         #viewport { position: absolute; top: 0; left: 75px; width: calc(100vw - 75px); height: calc(100vh - 110px); overflow: hidden; z-index: 1; cursor: grab; }
         #viewport:active { cursor: grabbing; }
         
-        /* ODAK NOKTASI TAM MERKEZE ALINDI */
         #canvas-wrap { position: relative; width: 1028px; height: 1028px; background: #ffffff; transform-origin: center center; }
         canvas { width: 100%; height: 100%; }
     </style>
@@ -56,6 +63,11 @@
         <div class="hitbox-btn"><img src="home.png"></div>
         <div class="hitbox-btn"><img src="profile.png"></div>
         <div class="hitbox-btn"><img src="chat.png"></div>
+    </div>
+
+    <div id="zoom-controls">
+        <div class="zoom-btn" onclick="zoomIn()"><img src="arti.png" alt="+"></div>
+        <div class="zoom-btn" onclick="zoomOut()"><img src="eksi.png" alt="-"></div>
     </div>
 
     <div id="coords-display">(0_0-)</div>
@@ -77,10 +89,13 @@
         const coordsDisplay = document.getElementById('coords-display');
         
         let clr = '#000000', sc = 1, px = 0, py = 0, isDragging = false, pencilMode = false;
-        let startX, startY, isClick = true, initialPinchDist = 0;
+        let startX, startY, isClick = true;
         
-        cvs.width = 1028; cvs.height = 1028;
-        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 1028, 1028);
+        const mapSize = 1028;
+        const halfMap = mapSize / 2; // Merkez noktasını bulmak için (514)
+        
+        cvs.width = mapSize; cvs.height = mapSize;
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, mapSize, mapSize);
 
         const allColors = ['#000000', '#636363', '#AEAEAE', '#FFFFFF', '#FF0010', '#BC4E00', '#FF6A00', '#FFE900', '#3FFF00', '#00A510', '#00FFFF', '#00A1FF', '#0015FF', '#9800FF', '#FF00FA'];
         const rTop = document.getElementById('row-top'), rBot = document.getElementById('row-bottom');
@@ -90,8 +105,7 @@
 
         function createBox(c, row, index) {
             const b = document.createElement('div'); b.className = 'color-box'; b.style.backgroundColor = c;
-            const imgNum = index + 1;
-            b.innerHTML = `<img src="color${imgNum}.png">`;
+            b.innerHTML = `<img src="color${index + 1}.png">`;
             if(c === clr) b.classList.add('active');
             b.onclick = () => { document.querySelectorAll('.color-box').forEach(x=>x.classList.remove('active')); b.classList.add('active'); clr = c; };
             row.appendChild(b);
@@ -101,58 +115,58 @@
         pBtn.onclick = () => { pencilMode = !pencilMode; pBtn.classList.toggle('active', pencilMode); };
         rBot.appendChild(pBtn);
 
+        // GİZLİ KOORDİNAT İZLEYİCİ VE SINIR KORUMA FONKSİYONU
         function updateTransform() { 
+            // Kanvasın dışına çıkmayı engelleme (Sınır Koruyucu)
+            let maxBoundary = halfMap * sc;
+            if (px > maxBoundary) px = maxBoundary;
+            if (px < -maxBoundary) px = -maxBoundary;
+            if (py > maxBoundary) py = maxBoundary;
+            if (py < -maxBoundary) py = -maxBoundary;
+
             wrap.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; 
-            let midX = Math.floor((view.clientWidth/2 - px)/sc); 
-            let midY = Math.floor((view.clientHeight/2 - py)/sc);
+            
+            // Haritanın tam ortasını (514, 514) 0_0 kabul eden hesaplama
+            let midX = Math.floor((view.clientWidth / 2 - px) / sc) - halfMap; 
+            let midY = Math.floor((view.clientHeight / 2 - py) / sc) - halfMap;
             coordsDisplay.innerText = `(${midY}_${midX}-)`;
         }
 
+        // YENİ BUTONLAR İÇİN MERKEZ ODAKLI ZOOM FONKSİYONLARI
+        window.zoomIn = () => {
+            if (sc >= 15) return;
+            let oldSc = sc; sc += 0.5;
+            px -= (view.clientWidth / 2 - px) * (sc / oldSc - 1);
+            py -= (view.clientHeight / 2 - py) * (sc / oldSc - 1);
+            updateTransform();
+        };
+
+        window.zoomOut = () => {
+            if (sc <= 0.3) return;
+            let oldSc = sc; sc -= 0.5;
+            px -= (view.clientWidth / 2 - px) * (sc / oldSc - 1);
+            py -= (view.clientHeight / 2 - py) * (sc / oldSc - 1);
+            updateTransform();
+        };
+
         function handleDraw(cx, cy) {
             const rect = cvs.getBoundingClientRect();
-            const x = Math.floor((cx - rect.left) / (rect.width/1028));
-            const y = Math.floor((cy - rect.top) / (rect.height/1028));
-            if (x >= 0 && x < 1028 && y >= 0 && y < 1028) {
-                db.ref('pixels/'+y+'_'+x).set({color: clr});
+            const x = Math.floor((cx - rect.left) / (rect.width / mapSize));
+            const y = Math.floor((cy - rect.top) / (rect.height / mapSize));
+            if (x >= 0 && x < mapSize && y >= 0 && y < mapSize) {
+                db.ref('pixels/' + y + '_' + x).set({ color: clr });
             }
         }
 
         const startPan = (e) => {
-            if(e.target.closest('#main-side-panel') || e.target.closest('#main-bottom-palette')) return;
-            
-            if (e.touches && e.touches.length === 2) {
-                isDragging = false;
-                initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                return;
-            }
-            
-            isDragging = true;
-            isClick = true;
+            if(e.target.closest('#main-side-panel') || e.target.closest('#main-bottom-palette') || e.target.closest('#zoom-controls')) return;
+            isDragging = true; isClick = true;
             const cx = e.touches ? e.touches[0].clientX : e.clientX;
             const cy = e.touches ? e.touches[0].clientY : e.clientY;
-            startX = cx - px;
-            startY = cy - py;
+            startX = cx - px; startY = cy - py;
         };
 
         const movePan = (e) => {
-            if (e.touches && e.touches.length === 2) {
-                e.preventDefault();
-                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                let factor = dist / initialPinchDist;
-                
-                // Merkez odaklı dengeli zoom artışı
-                let oldSc = sc;
-                sc = factor > 1 ? Math.min(15, sc + 0.12) : Math.max(0.2, sc - 0.12);
-                
-                // Sağa kaçmayı önlemek için kayma düzeltmesi hesaplaması
-                px -= (view.clientWidth / 2 - px) * (sc / oldSc - 1);
-                py -= (view.clientHeight / 2 - py) * (sc / oldSc - 1);
-
-                initialPinchDist = dist;
-                updateTransform();
-                return;
-            }
-
             if (!isDragging) return;
             isClick = false;
             const cx = e.touches ? e.touches[0].clientX : e.clientX;
@@ -161,8 +175,7 @@
             if (pencilMode) {
                 handleDraw(cx, cy);
             } else {
-                px = cx - startX;
-                py = cy - startY;
+                px = cx - startX; py = cy - startY;
                 updateTransform();
             }
         };
@@ -176,30 +189,17 @@
             isDragging = false;
         };
 
-        // Masaüstü için merkez odaklı fare tekerleği zoom stabilizasyonu
-        view.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            let oldSc = sc;
-            sc = e.deltaY < 0 ? Math.min(15, sc + 0.2) : Math.max(0.2, sc - 0.2);
-            
-            px -= (view.clientWidth / 2 - px) * (sc / oldSc - 1);
-            py -= (view.clientHeight / 2 - py) * (sc / oldSc - 1);
-            
-            updateTransform();
-        }, { passive: false });
-
         view.addEventListener('mousedown', startPan);
         window.addEventListener('mousemove', movePan);
         window.addEventListener('mouseup', endPan);
 
         view.addEventListener('touchstart', startPan, { passive: true });
-        window.addEventListener('touchmove', movePan, { passive: false });
+        window.addEventListener('touchmove', movePan, { passive: true });
         window.addEventListener('touchend', endPan);
 
         db.ref('pixels').on('child_added', (s) => { 
             const [y,x] = s.key.split('_').map(Number); 
-            ctx.fillStyle = s.val().color; 
-            ctx.fillRect(x, y, 1, 1); 
+            ctx.fillStyle = s.val().color; ctx.fillRect(x, y, 1, 1); 
         });
 
         window.onload = () => { updateTransform(); };
