@@ -4,128 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ArtCanvas - Ana Sürüm</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* Genel Ekran Ayarları */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            image-rendering: pixelated; /* Çizimlerin pikselli ve net durması için */
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; image-rendering: pixelated; }
+        body { background-color: #121212; overflow: hidden; font-family: sans-serif; height: 100vh; width: 100vw; display: flex; }
 
-        body {
-            background-color: #121212; /* Kanvas alanı için arka plan */
-            overflow: hidden;
-            font-family: sans-serif;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-        }
-
-        /* SOL PANEL: Arka planına pannel.png oturacak */
+        /* KONTROL PANELİ */
         #main-side-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 75px;
-            height: 100vh;
-            background-image: url('pannel.png');
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            border-right: 4px solid #000000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 20px;
-            gap: 20px;
-            z-index: 2000;
+            position: fixed; top: 0; left: 0; width: 75px; height: 100vh;
+            background-image: url('pannel.png'); background-size: 100% 100%; background-repeat: no-repeat;
+            border-right: 4px solid #000000; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 15px; z-index: 2000;
+        }
+        .hitbox-btn { width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .hitbox-btn img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* LİDERİN MERKEZİ İZLEYİCİ PANELİ */
+        #coords-display {
+            position: fixed; top: 240px; left: 5px; width: 65px; background: rgba(0,0,0,0.85);
+            color: #FFD700; font-weight: bold; font-size: 11px; text-align: center;
+            padding: 4px 2px; border: 2px solid #000; border-radius: 4px; z-index: 2500; pointer-events: none;
         }
 
-        /* BUTON HITBOX ALANLARI */
-        .hitbox-btn {
-            width: 55px;
-            height: 55px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-
-        /* Basılma efekti */
-        .hitbox-btn:active {
-            transform: scale(0.92);
-        }
-
-        .hitbox-btn img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* ALT PALET: Arka planına pallet.png oturacak */
+        /* ALT PALET */
         #main-bottom-palette {
-            position: fixed;
-            bottom: 0;
-            left: 75px;
-            width: calc(100vw - 75px);
-            height: 105px;
-            background-image: url('pallet.png');
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            border-top: 4px solid #000000;
-            z-index: 2000;
+            position: fixed; bottom: 0; left: 75px; width: calc(100vw - 75px); height: 110px;
+            background-image: url('pallet.png'); background-size: 100% 100%; background-repeat: no-repeat;
+            border-top: 4px solid #000000; z-index: 2000; display: flex; flex-direction: column; justify-content: center; padding: 10px; gap: 6px;
         }
+        .palette-row { display: flex; gap: 5px; width: 100%; height: 40px; }
+        
+        /* GÖRSEL DESTEKLİ RENK KUTULARI */
+        .color-box { flex: 1; height: 100%; border: 3px solid #000000; border-radius: 6px; cursor: pointer; overflow: hidden; }
+        .color-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .color-box.active { border-color: #ffffff; transform: scale(1.05); }
+        
+        .tool-box { width: 40px; height: 100%; border: 3px solid #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+        .tool-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        #tool-pencil.active { border-color: #FFD700; background-color: rgba(255, 215, 0, 0.3); }
 
-        /* ORTA ALAN */
-        #center-view {
-            position: absolute;
-            top: 0;
-            left: 75px;
-            width: calc(100vw - 75px);
-            height: calc(100vh - 105px);
-        }
+        /* KANVAS VIEWPORT */
+        #viewport { position: absolute; top: 0; left: 75px; width: calc(100vw - 75px); height: calc(100vh - 110px); overflow: hidden; z-index: 1; }
+        #canvas-wrap { position: relative; width: 1028px; height: 1028px; background: #ffffff; transform-origin: center; }
+        canvas { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
-    <!-- SOL PANEL VE BUTON GÖRSELLERİ -->
     <div id="main-side-panel">
-        <!-- Home / Event Butonu -->
-        <div class="hitbox-btn" id="hitbox-home">
-            <img src="home.png" alt="Home">
-        </div>
-        <!-- Profil Butonu -->
-        <div class="hitbox-btn" id="hitbox-profile">
-            <img src="profile.png" alt="Profil">
-        </div>
-        <!-- Chat Butonu -->
-        <div class="hitbox-btn" id="hitbox-chat">
-            <img src="chat.png" alt="Chat">
-        </div>
+        <div class="hitbox-btn"><img src="home.png"></div>
+        <div class="hitbox-btn"><img src="profile.png"></div>
+        <div class="hitbox-btn"><img src="chat.png"></div>
     </div>
 
-    <!-- KANVASIN GELECEĞİ BOŞ ALAN -->
-    <div id="center-view"></div>
+    <div id="coords-display">(0_0-)</div>
 
-    <!-- ALT PANEL (Görseli kaplayacak boş alan) -->
-    <div id="main-bottom-palette"></div>
+    <div id="viewport"><div id="canvas-wrap"><canvas id="artCanvas"></canvas></div></div>
+
+    <div id="main-bottom-palette">
+        <div class="palette-row" id="row-top"></div>
+        <div class="palette-row" id="row-bottom"></div>
+    </div>
 
     <script>
-        console.log("ArtCanvas Ana Sürüm: Asset tabanlı arayüz hazır lider!");
+        const firebaseConfig = { databaseURL: "https://ukzcm-artcanvas-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Hitbox tıklama testleri
-        document.getElementById('hitbox-home').addEventListener('click', () => {
-            console.log("Home butonuna tıklandı.");
-        });
-        document.getElementById('hitbox-profile').addEventListener('click', () => {
-            console.log("Profil butonuna tıklandı.");
-        });
-        document.getElementById('hitbox-chat').addEventListener('click', () => {
-            console.log("Chat butonuna tıklandı.");
-        });
+        const cvs = document.getElementById('artCanvas'), ctx = cvs.getContext('2d');
+        const wrap = document.getElementById('canvas-wrap'), view = document.getElementById('viewport');
+        const coordsDisplay = document.getElementById('coords-display');
+        
+        let clr = '#000000', sc = 1, px = 0, py = 0, isDragging = false, pencilMode = false;
+        cvs.width = 1028; cvs.height = 1028;
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 1028, 1028);
+
+        // 15 Özel Renk Kodun
+        const allColors = ['#000000', '#636363', '#AEAEAE', '#FFFFFF', '#FF0010', '#BC4E00', '#FF6A00', '#FFE900', '#3FFF00', '#00A510', '#00FFFF', '#00A1FF', '#0015FF', '#9800FF', '#FF00FA'];
+        const rTop = document.getElementById('row-top'), rBot = document.getElementById('row-bottom');
+
+        // Üst ve Alt sıraları asset sırasına göre diziyoruz
+        allColors.slice(0, 8).forEach((c, i) => createBox(c, rTop, i));
+        allColors.slice(8, 15).forEach((c, i) => createBox(c, rBot, i + 8));
+
+        function createBox(c, row, index) {
+            const b = document.createElement('div'); b.className = 'color-box'; b.style.backgroundColor = c;
+            
+            // color1.png, color2.png şeklinde senin assetlerini giydirir
+            const imgNum = index + 1;
+            b.innerHTML = `<img src="color${imgNum}.png">`;
+
+            b.onclick = () => { document.querySelectorAll('.color-box').forEach(x=>x.classList.remove('active')); b.classList.add('active'); clr = c; };
+            row.appendChild(b);
+        }
+
+        // Kalem Butonu Entegrasyonu (pencil.png)
+        const pBtn = document.createElement('div'); pBtn.className = 'tool-box'; pBtn.id = 'tool-pencil'; pBtn.innerHTML = '<img src="pencil.png">';
+        pBtn.onclick = () => { pencilMode = !pencilMode; pBtn.classList.toggle('active', pencilMode); };
+        rBot.appendChild(pBtn);
+
+        function updateTransform() { 
+            wrap.style.transform = `translate(${px}px, ${py}px) scale(${sc})`; 
+            let midX = Math.floor((view.clientWidth/2 - px)/sc); let midY = Math.floor((view.clientHeight/2 - py)/sc);
+            coordsDisplay.innerText = `(${midY}_${midX}-)`;
+        }
+
+        function handleDraw(cx, cy) {
+            const rect = cvs.getBoundingClientRect();
+            const x = Math.floor((cx - rect.left) / (rect.width/1028)), y = Math.floor((cy - rect.top) / (rect.height/1028));
+            if (pencilMode && x>=0 && y>=0) db.ref('pixels/'+y+'_'+x).set({color: clr});
+        }
+
+        view.addEventListener('mousedown', (e) => { isDragging = true; handleDraw(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e) => { if(isDragging && pencilMode) handleDraw(e.clientX, e.clientY); else if(isDragging) { px += e.movementX; py += e.movementY; updateTransform(); } });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        view.addEventListener('touchstart', (e) => { isDragging = true; handleDraw(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true});
+        window.addEventListener('touchmove', (e) => { if (pencilMode) e.preventDefault(); handleDraw(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
+        window.addEventListener('touchend', () => isDragging = false);
+
+        db.ref('pixels').on('child_added', (s) => { const [y,x] = s.key.split('_').map(Number); ctx.fillStyle = s.val().color; ctx.fillRect(x, y, 1, 1); });
+        window.onload = () => { updateTransform(); };
     </script>
 </body>
 </html>
